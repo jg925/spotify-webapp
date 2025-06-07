@@ -1,0 +1,50 @@
+body {
+  position: static;
+  display: flex;
+  overflow: visible;
+  width: auto;
+  height: 100vh;
+  margin-top: 0px;
+  margin-left: 0px;
+  flex-flow: column;
+  place-content: center;
+  align-items: center;
+  grid-auto-columns: 1fr;
+  gap: 30px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  background-color: transparent;
+  background-image: radial-gradient(
+    circle at 0% 0%,
+    red,
+    rgb(61, 0, 0) 29%,
+    black 50%,
+    navy 80%,
+    blue
+  );
+  pointer-events: auto;
+  font-family: Verdana, Geneva, sans-serif;
+  line-height: 40px;
+  text-decoration: none;
+  object-fit: fill;
+  font-family: Verdana, Geneva, sans-serif;
+  color: rgb(143, 143, 143);
+}
+
+@media screen and (max-width: 991px) {
+  body {
+    width: auto;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  body {
+    width: auto;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  body {
+    text-align: center;
+  }
+}
