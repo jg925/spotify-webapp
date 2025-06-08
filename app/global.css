@@ -1,3 +1,9 @@
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
 body {
   position: static;
   display: flex;
@@ -7,12 +13,8 @@ body {
   margin-top: 0px;
   margin-left: 0px;
   flex-flow: column;
-  place-content: center;
+  place-content: top;
   align-items: center;
-  grid-auto-columns: 1fr;
-  gap: 30px;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
   background-color: transparent;
   background-image: radial-gradient(
     circle at 0% 0%,
@@ -22,13 +24,40 @@ body {
     navy 80%,
     blue
   );
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   pointer-events: auto;
+}
+
+.pageContainer {
+  flex-direction: column; /* Stack children vertically */
+  align-items: center; /* Center-align content horizontally */
+  width: auto; /* Full width of the page */
+  justify-content: center;
+  text-align: center;
+}
+
+.text {
   font-family: Verdana, Geneva, sans-serif;
-  line-height: 40px;
+  line-height: 15px;
+  padding-top: 20px;
   text-decoration: none;
-  object-fit: fill;
+  text-align: center;
   font-family: Verdana, Geneva, sans-serif;
   color: rgb(143, 143, 143);
+}
+
+.playlistContainer {
+  border: none;
+  position: relative;
+  width: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* Allow widgets to wrap to the next row if needed */
+  gap: 20px; /* Add spacing between widgets */
+  justify-content: center; /* Center-align widgets horizontally */
+  text-align: center;
 }
 
 @media screen and (max-width: 991px) {

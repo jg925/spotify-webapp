@@ -1,17 +1,126 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import styles from "../components/playlistWidget.module.css";
+
+let nextZIndex = 1;
+
 type PlaylistWidgetProps = {
-  playlist: string;
+  playlistId: string;
+  initialX: number;
+  initialY: number;
 };
 
-export default function PlaylistWidget({ playlist }: PlaylistWidgetProps) {
-  function handleClick(playlist: string) {
-    alert("Saving playlist " + playlist);
+export default function PlaylistWidget({
+  playlistId,
+  initialX,
+  initialY,
+}: PlaylistWidgetProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: initialX, y: initialY });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [zIndex, setZIndex] = useState(nextZIndex++);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
+  const isDraggingRef = useRef(false);
+
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - offset.x,
+        y: e.clientY - offset.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!e.shiftKey) return;
+    setIsDragging(true);
+    console.log("dragging is true", isDragging);
+    setOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+    setZIndex(nextZIndex++);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Shift") {
+      setIsShiftHeld(true);
+    }
+  };
+  const handleKeyUp = (e: KeyboardEvent) => {
+    if (e.key === "Shift") {
+      setIsShiftHeld(false);
+      if (isDraggingRef.current) {
+        setIsDragging(false);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+      }
+    }
+  };
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, offset]);
+
+  if (!hasMounted) {
+    return null; // Prevent rendering on the server side
   }
+
   return (
-    <div>
-      <h3>{`playlist ${playlist}`}</h3>
-      <button onClick={() => handleClick(playlist)}>Save!</button>
+    <div
+      className={styles.container}
+      style={{
+        position: "absolute",
+        left: position.x,
+        top: position.y,
+        zIndex,
+      }}
+    >
+      <iframe
+        key={playlistId}
+        src={`https://open.spotify.com/embed/playlist/${playlistId}`}
+        className={styles.iframe}
+        allow="encrypted-media;"
+        loading="lazy"
+      />
+      <div
+        className={`${styles.overlay} ${isDragging ? styles.dragging : ""}`}
+        onMouseDown={handleMouseDown}
+        title="Hold Shift and drag to move"
+        style={{
+          cursor: isShiftHeld ? (isDragging ? "grabbing" : "grab") : "default",
+          pointerEvents: isShiftHeld ? "auto" : "none",
+        }}
+      />
     </div>
   );
 }

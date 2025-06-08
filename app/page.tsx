@@ -1,26 +1,20 @@
-import useState from "react";
-import PlaylistWidget from "./playlistWidget";
-import SpotifyWebApi from "spotify-web-api-js";
+import { PlaylistStack } from "./playlistStack";
+import { getMyPublicPlaylists } from "./spotify";
 
-export const spotifyApi = new SpotifyWebApi();
+const userId = process.env.SPOTIFY_USER_ID;
 
-spotifyApi.setAccessToken(process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "");
-
-export default function Page() {
-  function LibraryBody() {
-    return (
-      <div>
-        <p>I'm the library body.</p>
-        <PlaylistWidget playlist="1" />
-        <PlaylistWidget playlist="2" />
-      </div>
-    );
-  }
+export default async function Page() {
+  const playlistIds = await getMyPublicPlaylists(userId);
 
   return (
-    <div>
-      <h1>Shadow's Public Spotify Playlists</h1>
-      <LibraryBody />
+    <div className="pageContainer">
+      <div className="text">
+        <h1>Shadow's Public Spotify Playlists</h1>
+        <p>Click and hold the Shift key to drag the playlists around.</p>
+        <p>I have **too many** playlists, they take a while to load.</p>
+      </div>
+
+      <PlaylistStack playlistIds={playlistIds} />
     </div>
   );
 }
