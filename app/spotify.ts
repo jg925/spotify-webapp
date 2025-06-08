@@ -46,6 +46,8 @@ export async function getMyPublicPlaylists(userId: string): Promise<string[]> {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      cache: "force-cache",
+      next: { revalidate: 86400 }, //24 hours
     }
   );
   const clonedResponse = response.clone();
