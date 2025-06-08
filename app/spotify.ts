@@ -31,9 +31,14 @@ async function getAccessToken() {
   }
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function getMyPublicPlaylists(userId: string): Promise<string[]> {
   const accessToken = await getAccessToken();
   console.log("Access Token: ", accessToken);
+  await sleep(500);
   const response = await fetch(
     `https://api.spotify.com/v1/users/${userId}/playlists?`,
     {
