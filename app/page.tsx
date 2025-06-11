@@ -1,20 +1,27 @@
+"use client";
 import { PlaylistStack } from "./playlistStack";
-import { getMyPublicPlaylists } from "./spotify";
-import Head from "next/head";
+import { useState, useEffect } from "react";
+import { retrievePlaylists } from "./retrievePlaylists";
 
-const userId = process.env.SPOTIFY_USER_ID;
-
-export default async function Page() {
-  const playlistIds = await getMyPublicPlaylists(userId);
+export default function Page() {
+  const [playlistIds, setPlaylistIds] = useState<string[]>([]);
+  useEffect(() => {
+    async function fetchPlaylists() {
+      const playlistIds = await retrievePlaylists();
+      setPlaylistIds(playlistIds);
+    }
+    fetchPlaylists();
+  }, []);
 
   return (
     <div className="pageContainer">
       <head>
+        <link rel="icon" href="/assets/favico.png" />
         <title>My Public Spotify Playlists</title>
       </head>
       <div className="text">
         <h1>My Public Spotify Playlists</h1>
-        <p>Click and hold the Shift key to drag the playlists around.</p>
+        <p>Hold the Shift key and click to drag the playlists around.</p>
         <p>
           I have {playlistIds.length} public playlists, they take a while to
           load.
