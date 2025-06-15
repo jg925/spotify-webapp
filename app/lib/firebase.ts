@@ -5,6 +5,7 @@ import {
   initializeFirestore,
   enableNetwork,
   disableNetwork,
+  CACHE_SIZE_UNLIMITED,
 } from "firebase/firestore";
 //import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -30,18 +31,19 @@ const firebaseConfig = {
   appId: firebaseAppId,
   //measurementId: firebaseMeasurementId,
 };
-console.log("Firebase Config:", firebaseConfig);
+//console.log("Firebase Config:", firebaseConfig);
 
 //if (!getApps().length) {
 const app = initializeApp(firebaseConfig);
 //}
 const db = initializeFirestore(app, {
-  cacheSizeBytes: 10485760, // 10 MB
-  experimentalForceLongPolling: true, // For compatibility with some environments
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED, // 10 MB
+  ignoreUndefinedProperties: true, // Ignore undefined properties in documents
+  //experimentalForceLongPolling: true, // For compatibility with some environments
 });
 
-//const db = getFirestore();
-console.log("Firebase initialized", db);
+//const db = getFirestore(app, "(default)");
+//console.log("Firebase initialized", db);
 //const analytics = getAnalytics(app);
 /*
 disableNetwork(db)

@@ -4,15 +4,15 @@ import { doc, getDocFromServer, setLogLevel } from "firebase/firestore";
 //setLogLevel("debug");
 
 export async function retrievePlaylists() {
-  const cacheKey = "playlistIdsCache";
-  localStorage.removeItem("playlistIdsCache"); // Clear cache on each call for fresh data
+  //const cacheKey = "playlistIdsCache";
+  //localStorage.removeItem("playlistIdsCache"); // Clear cache on each call for fresh data
   try {
     // Check for playlist cache
-    const cachedPlaylists = localStorage.getItem(cacheKey);
-    if (cachedPlaylists) {
-      console.log("Using cached playlists");
-      return JSON.parse(cachedPlaylists);
-    }
+    //  const cachedPlaylists = localStorage.getItem(cacheKey);
+    // if (cachedPlaylists) {
+    //   console.log("Using cached playlists");
+    //  return JSON.parse(cachedPlaylists);
+    //  }
     const docRef = doc(db, "playlists", "playlistIds");
     console.log("Fetching playlists from Firestore...", docRef.path);
     // Fetch playlist IDs from Firestore
@@ -31,7 +31,7 @@ export async function retrievePlaylists() {
           }
 
           //Cache the playlists in localStorage
-          localStorage.setItem(cacheKey, JSON.stringify(playlistIds));
+          //          localStorage.setItem(cacheKey, JSON.stringify(playlistIds));
           console.log("Fetched playlists from Firestore");
           console.log("Playlist Ids: ", playlistIds);
           return playlistIds;
