@@ -1,11 +1,11 @@
 import { db } from "./lib/firebase";
-import { doc, getDoc, setLogLevel } from "firebase/firestore";
+import { doc, getDocFromServer, setLogLevel } from "firebase/firestore";
 
-setLogLevel("debug");
+//setLogLevel("debug");
 
 export async function retrievePlaylists() {
   const cacheKey = "playlistIdsCache";
-
+  localStorage.removeItem("playlistIdsCache"); // Clear cache on each call for fresh data
   try {
     // Check for playlist cache
     const cachedPlaylists = localStorage.getItem(cacheKey);
@@ -18,12 +18,17 @@ export async function retrievePlaylists() {
     // Fetch playlist IDs from Firestore
     for (let i = 0; i < 3; i++) {
       try {
-        const docSnap = await getDoc(docRef);
+        console.log(`before docSnap attempt ${i + 1}`);
+        const docSnap = await getDocFromServer(docRef);
+        console.log(`after docSnap attempt ${i + 1}`);
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          console.log("Document data:", data);
-          const playlistIds = data.id;
+          console.log("Document data", data);
+          const playlistIds = Array.isArray(data.id) ? data.id : [];
+          if (playlistIds.length === 0) {
+            console.warn("No playlists found in Firestore.");
+          }
 
           //Cache the playlists in localStorage
           localStorage.setItem(cacheKey, JSON.stringify(playlistIds));
