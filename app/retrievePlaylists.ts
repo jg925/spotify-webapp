@@ -4,17 +4,22 @@ import { doc, getDocFromServer, setLogLevel } from "firebase/firestore";
 //setLogLevel("debug");
 
 export async function retrievePlaylists() {
-  //const cacheKey = "playlistIdsCache";
+  const cacheKey = "playlistIdsCache";
+  const cacheExpiryKey = "playlistIdsCacheExpiry";
+  const cacheExpiryTime = 3600 * 1000;
   //localStorage.removeItem("playlistIdsCache"); // Clear cache on each call for fresh data
   try {
     // Check for playlist cache
-    //  const cachedPlaylists = localStorage.getItem(cacheKey);
-    // if (cachedPlaylists) {
-    //   console.log("Using cached playlists");
-    //  return JSON.parse(cachedPlaylists);
-    //  }
+    const cachedPlaylists = localStorage.getItem(cacheKey);
+    const cachedExpiry = localStorage.getItem("playlistIdsCacheExpiry");
+    if (cachedPlaylists && cachedExpiry) {
+      const expiryTime = parseInt(cachedExpiry, 10);
+      if (Date.now() < expiryTime) {
+        console.log("Using cached playlists");
+        return JSON.parse(cachedPlaylists);
+      }
+    }
     const docRef = doc(db, "playlists", "playlistIds");
-    console.log("Fetching playlists from Firestore...", docRef.path);
     // Fetch playlist IDs from Firestore
     for (let i = 0; i < 3; i++) {
       try {
@@ -31,9 +36,8 @@ export async function retrievePlaylists() {
           }
 
           //Cache the playlists in localStorage
-          //          localStorage.setItem(cacheKey, JSON.stringify(playlistIds));
+          localStorage.setItem(cacheKey, JSON.stringify(playlistIds));
           console.log("Fetched playlists from Firestore");
-          console.log("Playlist Ids: ", playlistIds);
           return playlistIds;
         } else {
           console.error("No such document!");
