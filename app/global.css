@@ -30,12 +30,26 @@ body {
   pointer-events: auto;
 }
 
+.return-home {
+  margin-top: 20px;
+  margin-left: 20px;
+  padding-top: 0px;
+  padding-left: 0px;
+  align-self: flex-start;
+}
+
 .pageContainer {
   flex-direction: column; /* Stack children vertically */
   align-items: center; /* Center-align content horizontally */
   width: auto; /* Full width of the page */
   justify-content: center;
   text-align: center;
+}
+
+.image {
+  margin-top: 0px;
+  margin-left: 0px;
+  align-self: center;
 }
 
 .text {
