@@ -52,7 +52,9 @@ export default function Page() {
       {/*Conditionally render playlistStack or playlistDeck.*/}
       {useMobile ? (
         <div className="mobileView">
-          <p>Please swap to desktop view. Mobile view is not setup.</p>
+          <p className="text">
+            Please swap to desktop view. Mobile view is not setup.
+          </p>
           {/*playlistIds.length > 0 && <PlaylistDeck playlists={playlistIds} />*/}
         </div>
       ) : (
