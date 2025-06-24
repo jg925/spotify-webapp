@@ -3,5 +3,6 @@ node_modules/
 # Local Netlify folder
 .netlify
 .next/
+next.config.ts
 
 firebase-key.json

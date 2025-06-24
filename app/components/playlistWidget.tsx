@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import styles from "../components/playlistWidget.module.css";
+import styles from "../../components/playlistWidget.module.css";
 
 let nextZIndex = 1;
 
