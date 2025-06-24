@@ -1,7 +1,10 @@
 "use client";
-import { PlaylistStack } from "./playlistStack";
+import { PlaylistStack } from "./components/playlistStack";
+//import { PlaylistDeck } from "./components/playlistDeck";
 import { useState, useEffect } from "react";
 import { retrievePlaylists } from "./retrievePlaylists";
+import { isMobile } from "../hooks/isMobile";
+//import { PlaylistCardWidget } from "./components/playlistCardWidget";
 
 export default function Page() {
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
@@ -25,6 +28,9 @@ export default function Page() {
     fetchPlaylists();
   }, []);
 
+  // Check if the user is on a mobile device
+  const useMobile = isMobile();
+
   return (
     <div className="pageContainer">
       <head>
@@ -43,9 +49,21 @@ export default function Page() {
           </p>
         )}
       </div>
-
-      {/*Conditionally render playlistStack.*/}
-      {playlistIds.length > 0 && <PlaylistStack playlistIds={playlistIds} />}
+      {/*Conditionally render playlistStack or playlistDeck.*/}
+      {useMobile ? (
+        <div className="mobileView">
+          <p className="text">
+            Please swap to desktop view. Mobile view is not setup.
+          </p>
+          {/*playlistIds.length > 0 && <PlaylistDeck playlists={playlistIds} />*/}
+        </div>
+      ) : (
+        <div className="desktopView">
+          {playlistIds.length > 0 && (
+            <PlaylistStack playlistIds={playlistIds} />
+          )}
+        </div>
+      )}
     </div>
   );
 }
