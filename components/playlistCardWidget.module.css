@@ -1,0 +1,32 @@
+.card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  will-change: transform;
+}
+
+.iframe {
+  width: 100%;
+  height: 380px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.overlay {
+  /*must be enabled to drag*/
+  position: absolute;
+  border: 1px solid red;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  z-index: 11;
+  pointer-events: auto;
+}
+
+.overlay.dragging {
+  /*cursor: grabbing;*/
+  z-index: 100; /* Bring to front when dragging */
+}

@@ -1,0 +1,23 @@
+.deckContainer {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 420px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.backCard {
+  position: absolute;
+  inset: 0;
+  transform: scale(0.95);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.backCard iframe {
+  width: 100%;
+  height: 380px;
+  border: none;
+  border-radius: 12px;
+}
