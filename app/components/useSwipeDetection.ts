@@ -110,14 +110,17 @@ export function useSwipeDetection() {
     const dt = Date.now() - touchStart.time;
 
     // If quick tap: no dragging.
-    if (
-      !isDragging &&
-      dt < 200 &&
-      dx < dragThreshold &&
-      interactionMode === "tap"
-    ) {
+    if (!isDragging && dt < 200 && dx < dragThreshold) {
+      if (interactionMode === "tap") {
+        return "tap"; // already in tap mode
+      }
       //setInteractionMode("tap");
-      return "tap";
+      return null;
+    }
+
+    // handle swipe in swipe mode
+    if (dx > minSwipeDistance && interactionMode === "swipe") {
+      return "swipe"; // valid swipe gesture
     }
 
     return null; //neither
@@ -126,6 +129,7 @@ export function useSwipeDetection() {
     touchEnd,
     isDragging,
     dragThreshold,
+    minSwipeDistance,
     interactionMode,
     longPressTimeout,
   ]);

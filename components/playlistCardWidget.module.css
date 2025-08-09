@@ -1,3 +1,14 @@
+.tapOverlay {
+  postion: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15; /* higher than iframe, lower than mode*/
+  pointer-events: auto;
+  background: transparent; /* explicit transparent bg */
+}
+
 .overlay {
   /*must be enabled to drag*/
   position: absolute;
@@ -48,7 +59,7 @@
   border-radius: 12px;
   font-size: 12px;
   pointer-events: none;
-  z-index: 15; /* Ensure it's above the card */
+  z-index: 20; /* Ensure it's above the card */
 }
 
 @media (hover: none) and (pointer: coarse) {

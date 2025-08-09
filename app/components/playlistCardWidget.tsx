@@ -192,7 +192,22 @@ const PlaylistCardWidget = memo(
             pointerEvents:
               interactionMode === "tap" && isInteractive ? "auto" : "none",
           }}
+          // prevent iframe from blocking long press events
+          onTouchStart={(e) => {
+            if (interactionMode === "tap") {
+              e.stopPropagation(); // prevent iframe from capturing touch events
+            }
+          }}
         />
+        {/* overlay for long press detection in tap mode */}
+        {isInteractive && interactionMode === "tap" && (
+          <div
+            className={styles.tapOverlay}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={handlePointerUp as any}
+          />
+        )}
         {/* conditional overlay for only top card during swipe */}
         {isInteractive && interactionMode === "swipe" && (
           <div
