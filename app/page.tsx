@@ -1,6 +1,6 @@
 "use client";
 import { PlaylistStack } from "./components/playlistStack";
-//import { PlaylistDeck } from "./components/playlistDeck";
+import { PlaylistDeck } from "./components/playlistDeck";
 import { useState, useEffect } from "react";
 import { retrievePlaylists } from "./retrievePlaylists";
 import { isMobile } from "../hooks/isMobile";
@@ -52,10 +52,7 @@ export default function Page() {
       {/*Conditionally render playlistStack or playlistDeck.*/}
       {useMobile ? (
         <div className="mobileView">
-          <p className="text">
-            Please swap to desktop view. Mobile view is not setup.
-          </p>
-          {/*playlistIds.length > 0 && <PlaylistDeck playlists={playlistIds} />*/}
+          {playlistIds.length > 0 && <PlaylistDeck playlists={playlistIds} />}
         </div>
       ) : (
         <div className="desktopView">
