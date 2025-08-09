@@ -1,6 +1,7 @@
 "use client";
 import { PlaylistStack } from "./components/playlistStack";
 import { PlaylistDeck } from "./components/playlistDeck";
+import { InteractionModeProvider } from "./components/interactionModeContext";
 import { useState, useEffect, memo, useCallback, use, useMemo } from "react";
 import { retrievePlaylists } from "./retrievePlaylists";
 import { isMobile } from "../hooks/isMobile";
@@ -50,49 +51,52 @@ export default function Page() {
   }, [playlistIds, handleCurrentChange]);
 
   return (
-    <div className="pageContainer">
-      <head>
-        <link rel="icon" href="/assets/favico.png" />
-        <title>My Public Spotify Playlists</title>
-      </head>
-      <div className="text">
-        <h1>My Public Spotify Playlists</h1>
-        <p>Hold the Shift key and click to drag the playlists around.</p>
-        {error ? (
-          <p className="error">{error}</p>
+    // wrap entire app with interaction mode provider
+    <InteractionModeProvider>
+      <div className="pageContainer">
+        <head>
+          <link rel="icon" href="/assets/favico.png" />
+          <title>My Public Spotify Playlists</title>
+        </head>
+        <div className="text">
+          <h1>My Public Spotify Playlists</h1>
+          <p>Hold the Shift key and click to drag the playlists around.</p>
+          {error ? (
+            <p className="error">{error}</p>
+          ) : (
+            <p>
+              I have {playlistIds.length} public playlists, they take a while to
+              load.
+            </p>
+          )}
+        </div>
+        {/*Conditionally render playlistStack or playlistDeck.*/}
+        {useMobile ? (
+          <div className="mobileView">
+            {playlistIds.length > 0 && (
+              <div
+                style={{
+                  width: "100%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  color: "white",
+                  margin: "20px 0",
+                }}
+              >
+                {currentIndex + 1} / {playlistIds.length}
+              </div>
+            )}
+            {playlistDeck}
+          </div>
         ) : (
-          <p>
-            I have {playlistIds.length} public playlists, they take a while to
-            load.
-          </p>
+          <div className="desktopView">
+            {playlistIds.length > 0 && (
+              <PlaylistStack playlistIds={playlistIds} />
+            )}
+          </div>
         )}
       </div>
-      {/*Conditionally render playlistStack or playlistDeck.*/}
-      {useMobile ? (
-        <div className="mobileView">
-          {playlistIds.length > 0 && (
-            <div
-              style={{
-                width: "100%",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "20px",
-                color: "white",
-                margin: "20px 0",
-              }}
-            >
-              {currentIndex + 1} / {playlistIds.length}
-            </div>
-          )}
-          {playlistDeck}
-        </div>
-      ) : (
-        <div className="desktopView">
-          {playlistIds.length > 0 && (
-            <PlaylistStack playlistIds={playlistIds} />
-          )}
-        </div>
-      )}
-    </div>
+    </InteractionModeProvider>
   );
 }

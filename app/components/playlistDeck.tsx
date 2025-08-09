@@ -2,11 +2,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import styles from "../../components/playlistDeck.module.css";
 import { PlaylistCardWidget } from "./playlistCardWidget";
-import {
-  useSprings,
-  animated as a,
-  //to as interpolate,
-} from "@react-spring/web";
+import { useInteractionMode } from "./interactionModeContext";
+import { useSprings, animated as a } from "@react-spring/web";
 
 // Deck needs to know what is gone, what is on top, what is next, and how much
 // to render.
@@ -17,10 +14,11 @@ export function PlaylistDeck({
   playlists: string[];
   onCurrentChange?: (index: number) => void;
 }) {
-  //const [queue, setQueue] = useState(playlists);
-  //const [gone] = useState(() => new Set()); //for the playlists flicked away
   const [currentIndex, setCurrentIndex] = useState(0); //render top 2 cards
   const visibleCards = 2;
+
+  // global interaction mode
+  const { interactionMode, resetToSwipeMode } = useInteractionMode();
 
   // memoize spring config prevent recreation[57]
   const springConfig = useMemo(() => {
@@ -39,9 +37,6 @@ export function PlaylistDeck({
       zIndex: visibleCards - index, // Ensure the top card is on top
       rotation: 0, // better animations
       config: springConfig, // use the memoized config
-      // different spring for top vs 2nd card
-      //tension: index === 0 ? 300 : 500, //top is more responsive
-      //friction: index === 0 ? 30 : 50,  //Spring physics
     }),
     [springConfig] //only recreate springs if config changes
   );
@@ -63,6 +58,17 @@ export function PlaylistDeck({
     console.log("Playlist tapped:", playlistId);
     // handle tap interaction
   }, []);
+
+  const handleOutsideClick = useCallback(
+    (e: React.TouchEvent) => {
+      // only reset to swipe mode if currently in tap mode
+      if (interactionMode === "tap") {
+        console.log("outside area tapped, switching to swipe mode");
+        resetToSwipeMode();
+      }
+    },
+    [interactionMode, resetToSwipeMode]
+  );
 
   // memoize getCurrentPlaylistId
   const getCurrentPlaylistId = useCallback(
@@ -106,6 +112,7 @@ export function PlaylistDeck({
               (x) => `translateX(${x}px) scale(${style.scale.get()})`
             ),
           }}
+          onTouchEnd={(e) => e.stopPropagation()} //prevent touch events from bubbling up
         >
           {/* PlaylistCardWidget is the component that renders the actual playlist card */}
           <PlaylistCardWidget
@@ -119,6 +126,17 @@ export function PlaylistDeck({
         </a.div>
       );
     });
-  }, [springs, currentIndex, getCurrentPlaylistId, handleSwipe, api]);
-  return <div className={styles.deckContainer}>{renderedCards}</div>;
+  }, [
+    springs,
+    currentIndex,
+    getCurrentPlaylistId,
+    handleSwipe,
+    api,
+    handleTap,
+  ]);
+  return (
+    <div className={styles.deckContainer} onTouchEnd={handleOutsideClick}>
+      {renderedCards}
+    </div>
+  );
 }

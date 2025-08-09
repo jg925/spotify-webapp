@@ -1,6 +1,6 @@
 import { useState, TouchEvent, useCallback } from "react";
-import { InteractionMode } from "./types";
-import { start } from "repl";
+import { useInteractionMode } from "./interactionModeContext";
+import { to } from "@react-spring/web";
 
 interface TouchPoint {
   x: number;
@@ -14,8 +14,7 @@ export function useSwipeDetection() {
     null
   );
   const [isDragging, setIsDragging] = useState(false);
-  const [interactionMode, setInteractionMode] =
-    useState<InteractionMode>("swipe");
+  const { interactionMode, toggleInteractionMode } = useInteractionMode();
 
   //const [touchStartTime, setTouchStartTime] = useState<number>(0);
   const [longPressTimeout, setLongPressTimeout] =
@@ -49,11 +48,7 @@ export function useSwipeDetection() {
       const timeout = setTimeout(() => {
         console.log("Long press detected, toggling mode"); //debug
         // toggle interaction mode on long press
-        setInteractionMode((prev) => {
-          const newMode = prev === "swipe" ? "tap" : "swipe";
-          console.log("Mode changed from", prev, "to", newMode); //debug
-          return newMode;
-        });
+        toggleInteractionMode();
 
         //provide haptic feedback if avail
         if ("vibrate" in navigator) {
@@ -63,7 +58,7 @@ export function useSwipeDetection() {
 
       setLongPressTimeout(timeout);
     },
-    [longPressTimeout]
+    [longPressTimeout, toggleInteractionMode]
   );
 
   /**
