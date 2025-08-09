@@ -60,7 +60,18 @@ export default function Page() {
         </head>
         <div className="text">
           <h1>My Public Spotify Playlists</h1>
-          <p>Hold the Shift key and click to drag the playlists around.</p>
+          {/* conditionally display instruction text */}
+          {useMobile ? (
+            <p>
+              Swipe the playlist deck to flip through the playlists. Press and
+              hold on the embed to switch into Tap Mode to be able to interact
+              with embed. Tap again on or around the embed to switch back to
+              Swipe Mode.
+            </p>
+          ) : (
+            <p>Hold the Shift key and click to drag the playlists around.</p>
+          )}
+
           {error ? (
             <p className="error">{error}</p>
           ) : (
