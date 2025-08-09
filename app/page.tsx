@@ -1,7 +1,7 @@
 "use client";
 import { PlaylistStack } from "./components/playlistStack";
 import { PlaylistDeck } from "./components/playlistDeck";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, use, useMemo } from "react";
 import { retrievePlaylists } from "./retrievePlaylists";
 import { isMobile } from "../hooks/isMobile";
 //import { PlaylistCardWidget } from "./components/playlistCardWidget";
@@ -30,6 +30,24 @@ export default function Page() {
 
   // Check if the user is on a mobile device
   const useMobile = isMobile();
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // memoize the callback to prevent PlaylistDeck from re-rendering
+  const handleCurrentChange = useCallback((index: number) => {
+    setCurrentIndex(index);
+  }, []);
+
+  //memoize the deck component
+  const playlistDeck = useMemo(() => {
+    if (playlistIds.length === 0) return null;
+
+    return (
+      <PlaylistDeck
+        playlists={playlistIds}
+        onCurrentChange={handleCurrentChange}
+      />
+    );
+  }, [playlistIds, handleCurrentChange]);
 
   return (
     <div className="pageContainer">
@@ -52,7 +70,21 @@ export default function Page() {
       {/*Conditionally render playlistStack or playlistDeck.*/}
       {useMobile ? (
         <div className="mobileView">
-          {playlistIds.length > 0 && <PlaylistDeck playlists={playlistIds} />}
+          {playlistIds.length > 0 && (
+            <div
+              style={{
+                width: "100%",
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: "20px",
+                color: "white",
+                margin: "20px 0",
+              }}
+            >
+              {currentIndex + 1} / {playlistIds.length}
+            </div>
+          )}
+          {playlistDeck}
         </div>
       ) : (
         <div className="desktopView">

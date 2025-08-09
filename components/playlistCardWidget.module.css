@@ -1,9 +1,23 @@
-.card {
+.overlay {
+  /*must be enabled to drag*/
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /*border: 1px solid red;*/
+  inset: 0;
   width: 100%;
   height: 100%;
-  touch-action: none;
-  will-change: transform;
+  cursor: grab;
+  z-index: 12; /*need to ensure it's above iframe */
+  pointer-events: auto;
+  background: transparent; /*explicitly set transparent bg*/
+}
+
+.overlay.dragging {
+  cursor: grabbing;
+  z-index: 100; /* Bring to front when dragging */
 }
 
 .iframe {
@@ -12,21 +26,22 @@
   border: none;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  pointer-events: none; /* Prevent interaction with the iframe */
 }
 
-.overlay {
-  /*must be enabled to drag*/
-  position: absolute;
-  border: 1px solid red;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  cursor: grab;
-  z-index: 11;
-  pointer-events: auto;
+.card.interactive .iframe {
+  pointer-events: auto; /* Allow interaction when card is interactive */
 }
 
-.overlay.dragging {
-  /*cursor: grabbing;*/
-  z-index: 100; /* Bring to front when dragging */
+@media (hover: none) and (pointer: coarse) {
+  .overlay {
+    /* larger touch target for mobile */
+    padding: 10px;
+    margin: -10px;
+  }
+
+  .card {
+    /* prevents bounce scrolling from interfering with gestures */
+    overscroll-behavior: none;
+  }
 }
