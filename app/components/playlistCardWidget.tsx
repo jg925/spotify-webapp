@@ -54,7 +54,7 @@ const PlaylistCardWidget = memo(
         last, // end of drag
       }) => {
         //only top card responds to gestures
-        if (!isInteractive) return;
+        if (!isInteractive || interactionMode === "tap") return;
 
         //tracking dragging state
         if (first) setIsDragging(true);

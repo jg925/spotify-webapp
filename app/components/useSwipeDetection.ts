@@ -56,20 +56,23 @@ export function useSwipeDetection() {
    * handle touch movement during gesture
    * is this dragging or not
    */
-  function onTouchMove(e: TouchEvent) {
-    if (!touchStart) return; //no touch
+  const onTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!touchStart) return; //no touch
 
-    const touch = e.targetTouches[0];
-    const dx = Math.abs(touch.clientX - touchStart.x);
-    const dy = Math.abs(touch.clientY - touchStart.y);
+      const touch = e.targetTouches[0];
+      const dx = Math.abs(touch.clientX - touchStart.x);
+      const dy = Math.abs(touch.clientY - touchStart.y);
 
-    //if movement > threshold in any direction, drag
-    if (dx > dragThreshold || dy > dragThreshold) {
-      setIsDragging(true);
-      setInteractionMode("swipe"); //switch to swipe during drag
-    }
-    setTouchEnd({ x: touch.clientX, y: touch.clientY });
-  }
+      //if movement > threshold in any direction, drag
+      if (dx > dragThreshold || dy > dragThreshold) {
+        setIsDragging(true);
+        setInteractionMode("swipe"); //switch to swipe during drag
+      }
+      setTouchEnd({ x: touch.clientX, y: touch.clientY });
+    },
+    [touchStart, dragThreshold]
+  );
 
   /**
    * handle end of touch
