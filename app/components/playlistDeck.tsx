@@ -59,7 +59,7 @@ export function PlaylistDeck({
     // handle tap interaction
   }, []);
 
-  const handleOutsideClick = useCallback(
+  /*const handleOutsideClick = useCallback(
     (e: React.TouchEvent) => {
       // only reset to swipe mode if currently in tap mode
       if (interactionMode === "tap") {
@@ -68,7 +68,7 @@ export function PlaylistDeck({
       }
     },
     [interactionMode, resetToSwipeMode]
-  );
+  );*/
 
   // memoize getCurrentPlaylistId
   const getCurrentPlaylistId = useCallback(
@@ -135,7 +135,11 @@ export function PlaylistDeck({
     handleTap,
   ]);
   return (
-    <div className={styles.deckContainer} onTouchEnd={handleOutsideClick}>
+    <div
+      className={styles.deckContainer}
+      onClick={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+    >
       {renderedCards}
     </div>
   );

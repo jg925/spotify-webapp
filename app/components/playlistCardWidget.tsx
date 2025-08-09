@@ -54,46 +54,52 @@ const PlaylistCardWidget = memo(
         last, // end of drag
       }) => {
         //only top card responds to gestures
-        if (!isInteractive || interactionMode === "tap") return;
+        if (!isInteractive) return;
 
         //tracking dragging state
         if (first) setIsDragging(true);
         if (last) setIsDragging(false);
 
         //only count as a flick if velocity is high enough
-        const isFlicked = !down && (Math.abs(vx) > 0.2 || Math.abs(mx) > 100);
+        const isFlicked = !down && (Math.abs(vx) > 0.3 || Math.abs(mx) > 120);
 
         if (isFlicked) {
-          const flyX = xDir > 0 ? window.innerWidth : -window.innerWidth;
+          if (interactionMode === "swipe") {
+            const flyX = xDir > 0 ? window.innerWidth : -window.innerWidth;
 
-          if (springApi) {
-            //animate the card off, animate next into place
-            springApi.start((i: number) => {
-              if (i === cardIndex) {
-                return {
-                  x: flyX,
-                  opacity: 0,
-                  scale: 0.9, //smoother exit
-                  config: { tension: 200, friction: 30 }, //lower friction = faster exit
-                };
-              }
-              // don't animate the second
-              return {};
-            });
+            if (springApi) {
+              //animate the card off, animate next into place
+              springApi.start((i: number) => {
+                if (i === cardIndex) {
+                  return {
+                    x: flyX,
+                    opacity: 0,
+                    scale: 0.9, //smoother exit
+                    config: { tension: 200, friction: 30 }, //lower friction = faster exit
+                  };
+                }
+                // don't animate the second
+                return {};
+              });
+            }
+            //After animation completes, inform parent to update queue
+            setTimeout(() => {
+              onSwipe();
+            }, 250); // snappier response = lower timeout
           }
-          //After animation completes, inform parent to update queue
-          setTimeout(() => {
-            onSwipe();
-          }, 250); // snappier response = lower timeout
         } else {
           // on drag with no flick, snap back to center
           if (springApi) {
             springApi.start((i: number) => {
               if (i === cardIndex) {
                 return {
-                  x: down ? mx : 0,
+                  x: down ? (interactionMode === "swipe" ? mx : 0) : 0,
                   scale: down ? 1.02 : 1, //subtler when lower ratio
-                  rotation: down ? mx * 0.1 : 0, //rotate based on drag
+                  rotation: down
+                    ? interactionMode === "swipe"
+                      ? mx * 0.1
+                      : 0
+                    : 0, //rotate based on drag
                   config: {
                     tension: down ? 800 : 500,
                     friction: down ? 40 : 50, //smoother friction
@@ -175,9 +181,10 @@ const PlaylistCardWidget = memo(
               : undefined,
         }}
         // touch handlers for gestures
+        onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
         onTouchStart={isInteractive ? onTouchStart : undefined}
         onTouchMove={isInteractive ? onTouchMove : undefined}
-        onTouchEnd={isInteractive ? (handlePointerUp as any) : undefined}
+        onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
       >
         {/* spotify playlist embed */}
         <iframe
@@ -193,11 +200,13 @@ const PlaylistCardWidget = memo(
               interactionMode === "tap" && isInteractive ? "auto" : "none",
           }}
           // prevent iframe from blocking long press events
-          onTouchStart={(e) => {
-            if (interactionMode === "tap") {
-              e.stopPropagation(); // prevent iframe from capturing touch events
-            }
-          }}
+          onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
+          onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
+          //onTouchStart={(e) => {
+          //  if (interactionMode === "tap") {
+          //    e.stopPropagation(); // prevent iframe from capturing touch events
+          //  }
+          //}}
         />
         {/* overlay for long press detection in tap mode */}
         {isInteractive && interactionMode === "tap" && (
@@ -205,7 +214,9 @@ const PlaylistCardWidget = memo(
             className={styles.tapOverlay}
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
-            onTouchEnd={handlePointerUp as any}
+            //onTouchEnd={handlePointerUp as any}
+            onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
+            onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
           />
         )}
         {/* conditional overlay for only top card during swipe */}
@@ -213,6 +224,11 @@ const PlaylistCardWidget = memo(
           <div
             {...bind()} // moved gester binding to overlay instead of container
             className={`${styles.overlay} ${isDragging ? styles.dragging : ""}`}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            //onTouchEnd={handlePointerUp as any}
+            onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
+            onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
             //dynamic class based on dragging state
           />
         )}

@@ -21,8 +21,8 @@ export function useSwipeDetection() {
     useState<NodeJS.Timeout | null>(null);
   const LONG_PRESS_DELAY = 800; // ms
 
-  const minSwipeDistance = 50; // Minimum distance to consider a swipe
-  const dragThreshold = 10; // Minimum distance to consider a drag
+  const minSwipeDistance = 20; // Minimum distance to consider a swipe
+  const dragThreshold = 5; // Minimum distance to consider a drag
 
   /**
    * handle the start of a touch gesture
@@ -102,10 +102,11 @@ export function useSwipeDetection() {
     if (!touchStart || !touchEnd) return null; //no touch
 
     const dx = Math.abs(touchEnd.x - touchStart.x);
+    const dy = Math.abs(touchEnd.y - touchStart.y);
     const dt = Date.now() - touchStart.time;
 
     // If quick tap: no dragging.
-    if (!isDragging && dt < 200 && dx < dragThreshold) {
+    if (!isDragging && dt < 200 && dx < dragThreshold && dy < dragThreshold) {
       if (interactionMode === "tap") {
         return "tap"; // already in tap mode
       }
@@ -115,7 +116,9 @@ export function useSwipeDetection() {
 
     // handle swipe in swipe mode
     if (dx > minSwipeDistance && interactionMode === "swipe") {
-      return "swipe"; // valid swipe gesture
+      if (dx > dy) {
+        return "swipe"; // valid swipe gesture
+      }
     }
 
     return null; //neither

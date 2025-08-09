@@ -1,13 +1,23 @@
-.tapOverlay {
+.cardOutsideArea {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 15; /* higher than iframe, lower than mode*/
-  pointer-events: auto;
-  background: transparent; /* explicit transparent bg */
+  pointer-events: 10;
+  background: transparent;
 }
+
+/*.tapOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15; / higher than iframe, lower than mode/
+  pointer-events: auto;
+  background: transparent; /* explicit transparent bg /
+} */
 
 .overlay {
   /*must be enabled to drag*/
@@ -38,10 +48,12 @@
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   pointer-events: none; /* Prevent interaction with the iframe */
+  z-index: 11;
 }
 
 .tapMode .iframe {
   pointer-events: auto !important; /* force clickable in tap mode */
+  z-index: 15;
 }
 
 .swipeMode .iframe {

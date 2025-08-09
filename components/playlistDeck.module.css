@@ -6,7 +6,6 @@
   margin: 0 auto;
   overflow: hidden;
   touch-action: none; /* Prevent browser scroll */
-  padding: 25px; /* padding so there's space outside cards to tap*/
 }
 
 .backCard {
