@@ -17,7 +17,7 @@ export function useSwipeDetection() {
   const [interactionMode, setInteractionMode] =
     useState<InteractionMode>("swipe");
 
-  const [touchStartTime, setTouchStartTime] = useState<number>(0);
+  //const [touchStartTime, setTouchStartTime] = useState<number>(0);
   const [longPressTimeout, setLongPressTimeout] =
     useState<NodeJS.Timeout | null>(null);
   const LONG_PRESS_DELAY = 800; // ms
@@ -28,33 +28,46 @@ export function useSwipeDetection() {
   /**
    * handle the start of a touch gesture
    */
-  const onTouchStart = useCallback((e: TouchEvent) => {
-    const touch = e.targetTouches[0];
-    const startTime = Date.now();
+  const onTouchStart = useCallback(
+    (e: TouchEvent) => {
+      const touch = e.targetTouches[0];
+      const startTime = Date.now();
 
-    setTouchStart({
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now(),
-    });
-    setTouchStartTime(startTime);
-    setIsDragging(false); // reset dragging state
+      setTouchStart({
+        x: touch.clientX,
+        y: touch.clientY,
+        time: Date.now(),
+      });
+      //setTouchStartTime(startTime);
+      setIsDragging(false); // reset dragging state
 
-    const timeout = setTimeout(() => {
-      // toggle interaction mode on long press
-      setInteractionMode((prev) => (prev === "swipe" ? "tap" : "swipe"));
-      //provide haptic feedback if avail
-      if ("vibrate" in navigator) {
-        navigator.vibrate(50); // 50ms vibration
+      // clear any existing timeout
+      if (longPressTimeout) {
+        clearTimeout(longPressTimeout);
       }
-    }, LONG_PRESS_DELAY);
 
-    setLongPressTimeout(timeout);
-  }, []);
+      const timeout = setTimeout(() => {
+        console.log("Long press detected, toggling mode"); //debug
+        // toggle interaction mode on long press
+        setInteractionMode((prev) => {
+          const newMode = prev === "swipe" ? "tap" : "swipe";
+          console.log("Mode changed from", prev, "to", newMode); //debug
+          return newMode;
+        });
+
+        //provide haptic feedback if avail
+        if ("vibrate" in navigator) {
+          navigator.vibrate(50); // 50ms vibration
+        }
+      }, LONG_PRESS_DELAY);
+
+      setLongPressTimeout(timeout);
+    },
+    [longPressTimeout]
+  );
 
   /**
    * handle touch movement during gesture
-   * is this dragging or not
    */
   const onTouchMove = useCallback(
     (e: TouchEvent) => {
@@ -67,11 +80,16 @@ export function useSwipeDetection() {
       //if movement > threshold in any direction, drag
       if (dx > dragThreshold || dy > dragThreshold) {
         setIsDragging(true);
-        setInteractionMode("swipe"); //switch to swipe during drag
+
+        // clear long press timeout when dragging starts
+        if (longPressTimeout) {
+          clearTimeout(longPressTimeout);
+          setLongPressTimeout(null);
+        }
       }
       setTouchEnd({ x: touch.clientX, y: touch.clientY });
     },
-    [touchStart, dragThreshold]
+    [touchStart, dragThreshold, longPressTimeout]
   );
 
   /**

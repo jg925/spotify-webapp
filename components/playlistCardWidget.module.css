@@ -29,8 +29,26 @@
   pointer-events: none; /* Prevent interaction with the iframe */
 }
 
-.card.interactive .iframe {
-  pointer-events: auto; /* Allow interaction when card is interactive */
+.tapMode .iframe {
+  pointer-events: auto !important; /* force clickable in tap mode */
+}
+
+.swipeMode .iframe {
+  pointer-events: none !important; /* disable interaction in swipe mode */
+}
+
+.modeIndicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 15; /* Ensure it's above the card */
 }
 
 @media (hover: none) and (pointer: coarse) {

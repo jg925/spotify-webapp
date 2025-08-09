@@ -149,12 +149,12 @@ const PlaylistCardWidget = memo(
     );
 
     return (
-      <div
+      // gesture detection in main container, not just pointer events
+      <a.div
         className={`${styles.card} ${isInteractive ? styles.interactive : ""} ${
           interactionMode === "tap" ? styles.tapMode : styles.swipeMode
         }`} // conditional class for interactive cards
         style={{
-          //cursor: isInteractive ? "grab" : "default",
           touchAction: "none",
           position: "relative", // overlay positioning
           // visual feedback on mode
@@ -175,10 +175,9 @@ const PlaylistCardWidget = memo(
               : undefined,
         }}
         // touch handlers for gestures
-        onPointerDown={isInteractive ? (onTouchStart as any) : undefined}
-        onPointerMove={isInteractive ? (onTouchMove as any) : undefined}
-        onPointerUp={isInteractive ? handlePointerUp : undefined}
-        onClick={isInteractive ? handleClick : undefined}
+        onTouchStart={isInteractive ? onTouchStart : undefined}
+        onTouchMove={isInteractive ? onTouchMove : undefined}
+        onTouchEnd={isInteractive ? (handlePointerUp as any) : undefined}
       >
         {/* spotify playlist embed */}
         <iframe
@@ -210,7 +209,7 @@ const PlaylistCardWidget = memo(
               : "Tap Mode Active"}
           </div>
         )}
-      </div>
+      </a.div>
     );
   },
   (prevProps, nextProps) => {

@@ -7,7 +7,6 @@ import {
   animated as a,
   //to as interpolate,
 } from "@react-spring/web";
-import { get } from "http";
 
 // Deck needs to know what is gone, what is on top, what is next, and how much
 // to render.
@@ -60,6 +59,11 @@ export function PlaylistDeck({
     setCurrentIndex((prev) => prev + (1 % playlists.length)); //increment index
   }, [playlists.length]);
 
+  const handleTap = useCallback((playlistId: string) => {
+    console.log("Playlist tapped:", playlistId);
+    // handle tap interaction
+  }, []);
+
   // memoize getCurrentPlaylistId
   const getCurrentPlaylistId = useCallback(
     (offset = 0) => {
@@ -107,6 +111,7 @@ export function PlaylistDeck({
           <PlaylistCardWidget
             playlistId={playlistId}
             onSwipe={handleSwipe}
+            onTap={handleTap}
             isInteractive={isTopCard} //only the top card is interactive
             springApi={api} //pass the spring api for drag gestures
             cardIndex={i} //pass the index for styling
