@@ -46,10 +46,11 @@ export function useSwipeDetection() {
       }
 
       const timeout = setTimeout(() => {
-        console.log("Long press detected, toggling mode"); //debug
-        // toggle interaction mode on long press
-        toggleInteractionMode();
-
+        if (!isDragging) {
+          console.log("Long press detected, toggling mode"); //debug
+          // toggle interaction mode on long press
+          toggleInteractionMode();
+        }
         //provide haptic feedback if avail
         if ("vibrate" in navigator) {
           navigator.vibrate(50); // 50ms vibration
@@ -58,7 +59,7 @@ export function useSwipeDetection() {
 
       setLongPressTimeout(timeout);
     },
-    [longPressTimeout, toggleInteractionMode]
+    [longPressTimeout, toggleInteractionMode, isDragging]
   );
 
   /**
@@ -73,7 +74,7 @@ export function useSwipeDetection() {
       const dy = Math.abs(touch.clientY - touchStart.y);
 
       //if movement > threshold in any direction, drag
-      if (dx > dragThreshold || dy > dragThreshold) {
+      if (dx > dragThreshold || (dy > dragThreshold && !isDragging)) {
         setIsDragging(true);
 
         // clear long press timeout when dragging starts
@@ -84,7 +85,7 @@ export function useSwipeDetection() {
       }
       setTouchEnd({ x: touch.clientX, y: touch.clientY });
     },
-    [touchStart, dragThreshold, longPressTimeout]
+    [touchStart, dragThreshold, longPressTimeout, isDragging]
   );
 
   /**

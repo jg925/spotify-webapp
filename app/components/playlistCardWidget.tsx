@@ -20,6 +20,7 @@ type CardProps = {
   isInteractive?: boolean;
   springApi?: any;
   cardIndex?: number; // which index (0=top, 1=back)
+  interactionMode: InteractionMode; // global interaction mode
 };
 
 // Card needs to know what playlist to show and its transformation
@@ -31,12 +32,12 @@ const PlaylistCardWidget = memo(
     isInteractive = true,
     springApi,
     cardIndex = 0,
+    interactionMode,
   }: CardProps) {
     // dragging state
     const [isDragging, setIsDragging] = useState(false);
 
     const {
-      interactionMode,
       isDragging: isGestureActive,
       onTouchStart,
       onTouchMove,
@@ -208,38 +209,6 @@ const PlaylistCardWidget = memo(
           //  }
           //}}
         />
-        {/* overlay for long press detection in tap mode */}
-        {isInteractive && interactionMode === "tap" && (
-          <div
-            className={styles.tapOverlay}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            //onTouchEnd={handlePointerUp as any}
-            onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
-            onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
-          />
-        )}
-        {/* conditional overlay for only top card during swipe */}
-        {isInteractive && interactionMode === "swipe" && (
-          <div
-            {...bind()} // moved gester binding to overlay instead of container
-            className={`${styles.overlay} ${isDragging ? styles.dragging : ""}`}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            //onTouchEnd={handlePointerUp as any}
-            onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
-            onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
-            //dynamic class based on dragging state
-          />
-        )}
-        {/* new mode indicator */}
-        {isInteractive && (
-          <div className={styles.modeIndicator}>
-            {interactionMode === "swipe"
-              ? "Swipe Mode Active"
-              : "Tap Mode Active"}
-          </div>
-        )}
       </a.div>
     );
   },

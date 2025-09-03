@@ -17,8 +17,7 @@ export function PlaylistDeck({
   const [currentIndex, setCurrentIndex] = useState(0); //render top 2 cards
   const visibleCards = 2;
 
-  // global interaction mode
-  const { interactionMode, resetToSwipeMode } = useInteractionMode();
+  const { interactionMode, setInteractionMode } = useInteractionMode();
 
   // memoize spring config prevent recreation[57]
   const springConfig = useMemo(() => {
@@ -122,6 +121,7 @@ export function PlaylistDeck({
             isInteractive={isTopCard} //only the top card is interactive
             springApi={api} //pass the spring api for drag gestures
             cardIndex={i} //pass the index for styling
+            interactionMode={interactionMode} //pass the global interaction mode
           />
         </a.div>
       );
@@ -140,6 +140,16 @@ export function PlaylistDeck({
       onClick={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
     >
+      <button
+        onClick={() =>
+          setInteractionMode(interactionMode === "swipe" ? "tap" : "swipe")
+        }
+        className={styles.toggleButton}
+      >
+        {interactionMode === "swipe"
+          ? "Switch to Tap Mode"
+          : "Switch to Swipe Mode"}
+      </button>
       {renderedCards}
     </div>
   );

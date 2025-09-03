@@ -13,7 +13,8 @@ function PageContent() {
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const { interactionMode, resetToSwipeMode } = useInteractionMode();
+  const { interactionMode, resetToSwipeMode, setInteractionMode } =
+    useInteractionMode();
 
   useEffect(() => {
     async function fetchPlaylists() {
@@ -67,7 +68,6 @@ function PageContent() {
 
   return (
     <div
-      className="pageContainer"
       onClick={handleGlobalClick}
       onTouchEnd={handleGlobalClick}
       style={{ minHeight: "100vh", width: "100%" }}
