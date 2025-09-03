@@ -140,16 +140,6 @@ export function PlaylistDeck({
       onClick={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
     >
-      <button
-        onClick={() =>
-          setInteractionMode(interactionMode === "swipe" ? "tap" : "swipe")
-        }
-        className={styles.toggleButton}
-      >
-        {interactionMode === "swipe"
-          ? "Switch to Tap Mode"
-          : "Switch to Swipe Mode"}
-      </button>
       {renderedCards}
     </div>
   );

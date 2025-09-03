@@ -23,18 +23,3 @@
   border: none;
   border-radius: 12px;
 }
-
-.toggleButton {
-  position: fixed; /* or sticky, or just above the deck */
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  background: #1db954;
-  color: #fff;
-  padding: 10px 24px;
-  border-radius: 5px;
-  border: none;
-  font-size: 1.1em;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}

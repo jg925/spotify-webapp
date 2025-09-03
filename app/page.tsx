@@ -13,8 +13,7 @@ function PageContent() {
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const { interactionMode, resetToSwipeMode, setInteractionMode } =
-    useInteractionMode();
+  const { interactionMode, setInteractionMode } = useInteractionMode();
 
   useEffect(() => {
     async function fetchPlaylists() {
@@ -43,17 +42,6 @@ function PageContent() {
     setCurrentIndex(index);
   }, []);
 
-  // handler outside clicks
-  const handleGlobalClick = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
-      // only reset to swipe mode if currently in tap mode
-      if (interactionMode === "tap") {
-        resetToSwipeMode();
-      }
-    },
-    [interactionMode, resetToSwipeMode]
-  );
-
   //memoize the deck component
   const playlistDeck = useMemo(() => {
     if (playlistIds.length === 0) return null;
@@ -67,11 +55,7 @@ function PageContent() {
   }, [playlistIds, handleCurrentChange]);
 
   return (
-    <div
-      onClick={handleGlobalClick}
-      onTouchEnd={handleGlobalClick}
-      style={{ minHeight: "100vh", width: "100%" }}
-    >
+    <div style={{ minHeight: "100vh", width: "100%" }}>
       <head>
         <link rel="icon" href="/assets/favico.png" />
         <title>My Public Spotify Playlists</title>
@@ -103,19 +87,45 @@ function PageContent() {
       {useMobile ? (
         <div className="mobileView">
           {playlistIds.length > 0 && (
-            <div
-              style={{
-                width: "100%",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "20px",
-                color: "white",
-                margin: "20px 0",
-              }}
-            >
-              {currentIndex + 1} / {playlistIds.length}
-            </div>
+            <>
+              <div
+                style={{
+                  width: "100%",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: "20px",
+                  color: "white",
+                  margin: "20px 0",
+                }}
+              >
+                {currentIndex + 1} / {playlistIds.length}
+              </div>
+              <button
+                style={{
+                  margin: "0 auto 16px auto",
+                  display: "block",
+                  background: "#2d1db9ff",
+                  color: "#fff",
+                  padding: "10px 24px",
+                  borderRadius: "4px",
+                  border: "none",
+                  fontSize: "1.1em",
+                  fontWeight: 600,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                }}
+                onClick={() =>
+                  setInteractionMode(
+                    interactionMode === "swipe" ? "tap" : "swipe"
+                  )
+                }
+              >
+                {interactionMode === "swipe"
+                  ? "Switch to Tap Mode"
+                  : "Switch to Swipe Mode"}
+              </button>
+            </>
           )}
+
           {playlistDeck}
         </div>
       ) : (
