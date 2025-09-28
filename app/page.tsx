@@ -1,6 +1,7 @@
 "use client";
 import { PlaylistStack } from "./components/playlistStack";
 import { PlaylistDeck } from "./components/playlistDeck";
+import ToggleButton from "./components/toggleButton";
 import {
   InteractionModeProvider,
   useInteractionMode,
@@ -43,7 +44,7 @@ function PageContent() {
   }, []);
 
   //memoize the deck component
-  const playlistDeck = useMemo(() => {
+  /*const playlistDeck = useMemo(() => {
     if (playlistIds.length === 0) return null;
 
     return (
@@ -52,7 +53,7 @@ function PageContent() {
         onCurrentChange={handleCurrentChange}
       />
     );
-  }, [playlistIds, handleCurrentChange]);
+  }, [playlistIds, handleCurrentChange]);*/
 
   return (
     <div style={{ minHeight: "100vh", width: "100%" }}>
@@ -65,10 +66,8 @@ function PageContent() {
         {/* conditionally display instruction text */}
         {useMobile ? (
           <p>
-            Swipe the playlist deck to flip through the playlists. Press and
-            hold on the embed to switch into Tap Mode to be able to interact
-            with embed. Tap again on or around the embed to switch back to Swipe
-            Mode.
+            Tap on the button to toggle between interaction modes. Swipe the
+            playlist deck to flip through the playlists.
           </p>
         ) : (
           <p>Hold the Shift key and click to drag the playlists around.</p>
@@ -87,46 +86,15 @@ function PageContent() {
       {useMobile ? (
         <div className="mobileView">
           {playlistIds.length > 0 && (
-            <>
-              <div
-                style={{
-                  width: "100%",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: "20px",
-                  color: "white",
-                  margin: "20px 0",
-                }}
-              >
-                {currentIndex + 1} / {playlistIds.length}
-              </div>
-              <button
-                style={{
-                  margin: "0 auto 16px auto",
-                  display: "block",
-                  background: "#2d1db9ff",
-                  color: "#fff",
-                  padding: "10px 24px",
-                  borderRadius: "4px",
-                  border: "none",
-                  fontSize: "1.1em",
-                  fontWeight: 600,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-                }}
-                onClick={() =>
-                  setInteractionMode(
-                    interactionMode === "swipe" ? "tap" : "swipe"
-                  )
-                }
-              >
-                {interactionMode === "swipe"
-                  ? "Switch to Tap Mode"
-                  : "Switch to Swipe Mode"}
-              </button>
-            </>
+            <div>
+              {/* page number, centered, figure out styling later */}
+              <p>
+                {currentIndex + 1}/{playlistIds.length}
+              </p>
+              {/*<PlaylistDeck playlistIds={playlistIds} /> */}
+              <ToggleButton />
+            </div>
           )}
-
-          {playlistDeck}
         </div>
       ) : (
         <div className="desktopView">

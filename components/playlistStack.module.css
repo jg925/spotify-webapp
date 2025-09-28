@@ -1,0 +1,12 @@
+.playlistContainer {
+  border: none;
+  width: auto;
+  position: absolute;
+  transform: translateX(-200px);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* Allow widgets to wrap to the next row if needed */
+  gap: 20px; /* Add spacing between widgets */
+  justify-content: left; /* Center-align widgets horizontally */
+  text-align: center;
+}

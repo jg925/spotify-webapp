@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import PlaylistWidget from "./playlistWidget";
+import styles from "../../components/playlistStack.module.css";
 
 export function PlaylistStack({ playlistIds }: { playlistIds: string[] }) {
   const [containerWidth, setContainerWidth] = useState(0);
@@ -21,7 +22,7 @@ export function PlaylistStack({ playlistIds }: { playlistIds: string[] }) {
   const rowHeight = 20; // Adjust as needed
 
   return (
-    <div className="playlistContainer">
+    <div className={styles.playlistContainer}>
       {playlistIds.map((p, index) => {
         const column = Math.floor(index / 10);
         const row = index % 10;

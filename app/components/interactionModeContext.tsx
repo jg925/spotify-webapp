@@ -15,7 +15,7 @@ interface InteractionModeContextType {
   resetToSwipeMode: () => void; // forces swipe mode
 }
 
-const InteractionModeContext = createContext<
+export const InteractionModeContext = createContext<
   InteractionModeContextType | undefined
 >(undefined);
 

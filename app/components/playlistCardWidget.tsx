@@ -1,227 +1,128 @@
 "use client";
-import { useSpring, animated as a, to as interpolate } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
-import {
-  useState,
-  memo,
-  useCallback,
-  TouchEvent,
-  MouseEvent,
-  PointerEvent,
-} from "react";
-import styles from "../../components/playlistCardWidget.module.css";
-import { useSwipeDetection } from "./useSwipeDetection"; // custom hook for swipe detection.
-import { InteractionMode } from "./types";
 
-type CardProps = {
+import { useState, useRef, useEffect } from "react";
+import styles from "../../components/playlistCardWidget.module.css";
+
+let nextZIndex = 1;
+
+type PlaylistCardWidgetProps = {
   playlistId: string;
-  onSwipe: () => void;
-  onTap?: (playlistId: string) => void; // tap interactions
-  isInteractive?: boolean;
-  springApi?: any;
-  cardIndex?: number; // which index (0=top, 1=back)
-  interactionMode: InteractionMode; // global interaction mode
+  initialX: number;
+  initialY: number;
 };
 
-// Card needs to know what playlist to show and its transformation
-const PlaylistCardWidget = memo(
-  function PlaylistCardWidget({
-    playlistId,
-    onSwipe,
-    onTap,
-    isInteractive = true,
-    springApi,
-    cardIndex = 0,
-    interactionMode,
-  }: CardProps) {
-    // dragging state
-    const [isDragging, setIsDragging] = useState(false);
+//Need to change all of the mouse interactions to be touch interactions. And add a button?
 
-    const {
-      isDragging: isGestureActive,
-      onTouchStart,
-      onTouchMove,
-      onTouchEnd,
-    } = useSwipeDetection();
+export default function PlaylistCardWidget({
+  playlistId,
+  initialX,
+  initialY,
+}: PlaylistCardWidgetProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: initialX, y: initialY });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [zIndex, setZIndex] = useState(nextZIndex++);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
+  const isDraggingRef = useRef(false);
 
-    // Setup gesture using useDrag, but only if top card
-    const bind = useDrag(
-      ({
-        down,
-        movement: [mx, my],
-        direction: [xDir],
-        velocity: [vx],
-        first, // first drag
-        last, // end of drag
-      }) => {
-        //only top card responds to gestures
-        if (!isInteractive) return;
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
 
-        //tracking dragging state
-        if (first) setIsDragging(true);
-        if (last) setIsDragging(false);
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      setPosition({
+        x: e.clientX - offset.x,
+        y: e.clientY - offset.y,
+      });
+    }
+  };
 
-        //only count as a flick if velocity is high enough
-        const isFlicked = !down && (Math.abs(vx) > 0.3 || Math.abs(mx) > 120);
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
-        if (isFlicked) {
-          if (interactionMode === "swipe") {
-            const flyX = xDir > 0 ? window.innerWidth : -window.innerWidth;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!e.shiftKey) return;
+    setIsDragging(true);
+    console.log("dragging is true", isDragging);
+    setOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+    setZIndex(nextZIndex++);
+  };
 
-            if (springApi) {
-              //animate the card off, animate next into place
-              springApi.start((i: number) => {
-                if (i === cardIndex) {
-                  return {
-                    x: flyX,
-                    opacity: 0,
-                    scale: 0.9, //smoother exit
-                    config: { tension: 200, friction: 30 }, //lower friction = faster exit
-                  };
-                }
-                // don't animate the second
-                return {};
-              });
-            }
-            //After animation completes, inform parent to update queue
-            setTimeout(() => {
-              onSwipe();
-            }, 250); // snappier response = lower timeout
-          }
-        } else {
-          // on drag with no flick, snap back to center
-          if (springApi) {
-            springApi.start((i: number) => {
-              if (i === cardIndex) {
-                return {
-                  x: down ? (interactionMode === "swipe" ? mx : 0) : 0,
-                  scale: down ? 1.02 : 1, //subtler when lower ratio
-                  rotation: down
-                    ? interactionMode === "swipe"
-                      ? mx * 0.1
-                      : 0
-                    : 0, //rotate based on drag
-                  config: {
-                    tension: down ? 800 : 500,
-                    friction: down ? 40 : 50, //smoother friction
-                  },
-                };
-              }
-              // second card stays in place
-              return {};
-            });
-          }
-        }
-      },
-      {
-        axis: "x", //only allow horizontal dragging?
-        bounds: { left: -200, right: 200 }, //soft bounds so card doesn't get dragged too far
-        rubberband: true, //stretchy feeling
-        pointer: { touch: true }, // allow touch gestures
-        preventScroll: true, //prevent page scrolling during drag
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Shift") {
+      setIsShiftHeld(true);
+    }
+  };
+  const handleKeyUp = (e: KeyboardEvent) => {
+    if (e.key === "Shift") {
+      setIsShiftHeld(false);
+      if (isDraggingRef.current) {
+        setIsDragging(false);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
       }
-    );
+    }
+  };
 
-    // handle tap
-    const handlePointerUp = useCallback(
-      (e: PointerEvent) => {
-        const gesture = onTouchEnd();
-        if (gesture === "tap" && !isGestureActive && onTap && isInteractive) {
-          onTap(playlistId);
-        }
-      },
-      [onTouchEnd, isGestureActive, onTap, playlistId, isInteractive]
-    );
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
-    const handleClick = useCallback(
-      (e: MouseEvent) => {
-        // prevent clicks during drag or in swipe
-        if (isDragging || interactionMode === "swipe" || isGestureActive) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        if (onTap && isInteractive) {
-          onTap(playlistId); // call tap callback
-        }
-      },
-      [
-        isDragging,
-        interactionMode,
-        isGestureActive,
-        onTap,
-        playlistId,
-        isInteractive,
-      ]
-    );
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
 
-    return (
-      // gesture detection in main container, not just pointer events
-      <a.div
-        className={`${styles.card} ${isInteractive ? styles.interactive : ""} ${
-          interactionMode === "tap" ? styles.tapMode : styles.swipeMode
-        }`} // conditional class for interactive cards
-        style={{
-          touchAction: "none",
-          position: "relative", // overlay positioning
-          // visual feedback on mode
-          cursor: isInteractive // probably won't need this because mobile view, unless stylus
-            ? interactionMode === "tap"
-              ? "pointer"
-              : "grab"
-            : "default",
-          //probably delete this later
-          border:
-            interactionMode === "tap" && isInteractive
-              ? "2px solid #1DB954"
-              : "none",
-          //probably also delete this later
-          boxShadow:
-            interactionMode === "tap" && isInteractive
-              ? "0 0 20px rgba(29, 185, 84, 0.3)"
-              : undefined,
-        }}
-        // touch handlers for gestures
-        onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
-        onTouchStart={isInteractive ? onTouchStart : undefined}
-        onTouchMove={isInteractive ? onTouchMove : undefined}
-        onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
-      >
-        {/* spotify playlist embed */}
-        <iframe
-          src={`https://open.spotify.com/embed/playlist/${playlistId}`}
-          width="100%"
-          height="100%"
-          frameBorder="0"
-          className={styles.iframe}
-          allow="encrypted-media;"
-          loading="lazy"
-          style={{
-            pointerEvents:
-              interactionMode === "tap" && isInteractive ? "auto" : "none",
-          }}
-          // prevent iframe from blocking long press events
-          onClick={(e) => e.stopPropagation()} // prevent click events from bubbling up
-          onTouchEnd={(e) => e.stopPropagation()} // prevent touch events from bubbling up
-          //onTouchStart={(e) => {
-          //  if (interactionMode === "tap") {
-          //    e.stopPropagation(); // prevent iframe from capturing touch events
-          //  }
-          //}}
-        />
-      </a.div>
-    );
-  },
-  (prevProps, nextProps) => {
-    // custom comparison to prevent unnecessary re-renders
-    return (
-      prevProps.playlistId === nextProps.playlistId &&
-      prevProps.isInteractive === nextProps.isInteractive &&
-      prevProps.cardIndex === nextProps.cardIndex &&
-      prevProps.springApi === nextProps.springApi &&
-      prevProps.onTap === nextProps.onTap
-    );
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, offset]);
+
+  if (!hasMounted) {
+    return null; // Prevent rendering on the server side
   }
-);
 
-export { PlaylistCardWidget };
+  return (
+    <div
+      className={styles.container}
+      style={{
+        position: "absolute",
+        left: position.x,
+        top: position.y,
+        zIndex,
+      }}
+    >
+      <iframe
+        key={playlistId}
+        src={`https://open.spotify.com/embed/playlist/${playlistId}`}
+        className={styles.iframe}
+        allow="encrypted-media;"
+        loading="lazy"
+      />
+      <div
+        className={`${styles.overlay} ${isDragging ? styles.dragging : ""}`}
+        onMouseDown={handleMouseDown}
+        title="Hold Shift and drag to move"
+        style={{
+          cursor: isShiftHeld ? (isDragging ? "grabbing" : "grab") : "default",
+          pointerEvents: isShiftHeld ? "auto" : "none",
+        }}
+      />
+    </div>
+  );
+}

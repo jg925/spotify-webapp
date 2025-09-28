@@ -63,16 +63,20 @@ body {
   color: rgb(143, 143, 143);
 }
 
-.playlistContainer {
-  border: none;
-  position: relative;
-  width: auto;
+.desktopView {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap; /* Allow widgets to wrap to the next row if needed */
-  gap: 20px; /* Add spacing between widgets */
-  justify-content: center; /* Center-align widgets horizontally */
-  text-align: center;
+  justify-content: center;
+  width: auto;
+}
+
+.mobileView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: auto;
 }
 
 @media screen and (max-width: 991px) {
