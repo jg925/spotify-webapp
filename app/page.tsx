@@ -86,14 +86,14 @@ function PageContent() {
       {useMobile ? (
         <div className="mobileView">
           {playlistIds.length > 0 && (
-            <div>
+            <>
               {/* page number, centered, figure out styling later */}
-              <p>
+              <p className="text">
                 {currentIndex + 1}/{playlistIds.length}
               </p>
-              {/*<PlaylistDeck playlistIds={playlistIds} /> */}
+              <PlaylistDeck playlistIds={playlistIds} />
               <ToggleButton />
-            </div>
+            </>
           )}
         </div>
       ) : (

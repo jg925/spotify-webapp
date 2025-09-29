@@ -1,6 +1,7 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, PointerEvent } from "react";
+import { useSpring, animated as a } from "@react-spring/web";
+import { useInteractionMode } from "./interactionModeContext";
 import styles from "../../components/playlistCardWidget.module.css";
 
 let nextZIndex = 1;
@@ -9,6 +10,7 @@ type PlaylistCardWidgetProps = {
   playlistId: string;
   initialX: number;
   initialY: number;
+  //onSwipe?: () => void;
 };
 
 //Need to change all of the mouse interactions to be touch interactions. And add a button?
@@ -17,56 +19,63 @@ export default function PlaylistCardWidget({
   playlistId,
   initialX,
   initialY,
-}: PlaylistCardWidgetProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: initialX, y: initialY });
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [zIndex, setZIndex] = useState(nextZIndex++);
+}: //onSwipe,
+PlaylistCardWidgetProps) {
   const [hasMounted, setHasMounted] = useState(false);
-  const [isShiftHeld, setIsShiftHeld] = useState(false);
-  const isDraggingRef = useRef(false);
+  const isSwipingRef = useRef(false);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const { interactionMode } = useInteractionMode();
+  const [position, setPosition] = useSpring(() => ({
+    x: initialX,
+    y: initialY,
+    rotate: 0,
+  }));
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   useEffect(() => {
-    isDraggingRef.current = isDragging;
-  }, [isDragging]);
+    isSwipingRef.current = isSwiping;
+  }, [isSwiping]);
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
+  const handleTouchStart = (e: PointerEvent) => {
+    if (interactionMode === "swipe") {
+      console.log("touchStart");
+      touchStartX.current = e.clientX;
+      touchStartY.current = e.clientY;
+      console.log(
+        "touchStart coords:",
+        touchStartX.current,
+        touchStartY.current
+      );
+      setIsSwiping(true);
+    }
+  };
+
+  const handleTouchMove = (e: PointerEvent) => {
+    if (interactionMode === "swipe") {
+      const dx = e.clientX - touchStartX.current;
+      const dy = e.clientY - touchStartY.current;
       setPosition({
-        x: e.clientX - offset.x,
-        y: e.clientY - offset.y,
+        x: dx,
+        y: dy,
+        rotate: dx / 10,
       });
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!e.shiftKey) return;
-    setIsDragging(true);
-    console.log("dragging is true", isDragging);
-    setOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    });
-    setZIndex(nextZIndex++);
-  };
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Shift") {
-      setIsShiftHeld(true);
-    }
-  };
-  const handleKeyUp = (e: KeyboardEvent) => {
-    if (e.key === "Shift") {
-      setIsShiftHeld(false);
-      if (isDraggingRef.current) {
-        setIsDragging(false);
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
+  const handleTouchEnd = (e: PointerEvent) => {
+    if (interactionMode === "swipe") {
+      const dx = e.clientX - touchStartX.current;
+      if (Math.abs(dx) > 100) {
+        //becomes a flick
+        setPosition({ x: dx > 0 ? 500 : -500, rotate: dx / 10 });
+        //onSwipe();
+      } else {
+        //snap back to original position
+        setPosition({ x: initialX, y: initialY, rotate: 0 });
       }
+      setIsSwiping(false);
+      console.log("touchEnd");
     }
   };
 
@@ -75,37 +84,25 @@ export default function PlaylistCardWidget({
   }, []);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointermove", handleTouchMove);
+    window.addEventListener("pointerup", handleTouchEnd);
+    window.addEventListener("pointerdown", handleTouchStart);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handleTouchMove);
+      window.removeEventListener("pointerup", handleTouchEnd);
+      window.removeEventListener("pointerdown", handleTouchStart);
     };
-  }, [isDragging, offset]);
+  }, [isSwiping]);
 
   if (!hasMounted) {
     return null; // Prevent rendering on the server side
   }
 
   return (
-    <div
+    <a.div
       className={styles.container}
-      style={{
-        position: "absolute",
-        left: position.x,
-        top: position.y,
-        zIndex,
-      }}
+      //style={{ left: position.x, top: position.y}}
     >
       <iframe
         key={playlistId}
@@ -115,14 +112,23 @@ export default function PlaylistCardWidget({
         loading="lazy"
       />
       <div
-        className={`${styles.overlay} ${isDragging ? styles.dragging : ""}`}
-        onMouseDown={handleMouseDown}
-        title="Hold Shift and drag to move"
+        className={`${styles.overlay} ${
+          interactionMode === "swipe" ? styles.swiping : ""
+        }`}
+        onPointerDown={handleTouchStart}
+        onPointerMove={handleTouchMove}
+        onPointerUp={handleTouchEnd}
+        title="Flick fast enough to swipe card away"
         style={{
-          cursor: isShiftHeld ? (isDragging ? "grabbing" : "grab") : "default",
-          pointerEvents: isShiftHeld ? "auto" : "none",
+          cursor:
+            interactionMode === "swipe"
+              ? isSwiping
+                ? "grabbing"
+                : "grab"
+              : "default",
+          pointerEvents: isSwiping ? "auto" : "none",
         }}
       />
-    </div>
+    </a.div>
   );
 }

@@ -1,88 +1,36 @@
-.cardOutsideArea {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: 10;
-  background: transparent;
+.container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  border: none;
+  z-index: 10;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
-
-/*.tapOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 15; / higher than iframe, lower than mode/
-  pointer-events: auto;
-  background: transparent; /* explicit transparent bg /
-} */
 
 .overlay {
-  /*must be enabled to drag*/
+  /*must be enabled to swipe*/
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /*border: 1px solid red;*/
   inset: 0;
-  width: 100%;
+  width: 90%;
   height: 100%;
   cursor: grab;
-  z-index: 12; /*need to ensure it's above iframe */
+  z-index: 11;
   pointer-events: auto;
-  background: transparent; /*explicitly set transparent bg*/
+  touch-action: none;
 }
 
-.overlay.dragging {
+.overlay.swiping {
   cursor: grabbing;
   z-index: 100; /* Bring to front when dragging */
 }
 
 .iframe {
   width: 100%;
-  height: 380px;
+  height: 100%;
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  pointer-events: none; /* Prevent interaction with the iframe */
-  z-index: 11;
-}
-
-.tapMode .iframe {
-  pointer-events: auto !important; /* force clickable in tap mode */
-  z-index: 15;
-}
-
-.swipeMode .iframe {
-  pointer-events: none !important; /* disable interaction in swipe mode */
-}
-
-.modeIndicator {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border-radius: 12px;
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 20; /* Ensure it's above the card */
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .overlay {
-    /* larger touch target for mobile */
-    padding: 10px;
-    margin: -10px;
-  }
-
-  .card {
-    /* prevents bounce scrolling from interfering with gestures */
-    overscroll-behavior: none;
-  }
+  z-index: 0;
+  pointer-events: auto; /* Allow drag events to pass through */
+  display: block;
 }

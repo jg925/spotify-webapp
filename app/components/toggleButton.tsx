@@ -1,12 +1,9 @@
 "use client";
-import { useContext } from "react";
-import { InteractionModeContext } from "./interactionModeContext";
+import { useInteractionMode } from "./interactionModeContext";
 //import styles from "../../components/toggleButton.module.css";
 
 export default function ToggleButton() {
-  const { interactionMode, toggleInteractionMode } = useContext(
-    InteractionModeContext
-  );
+  const { interactionMode, toggleInteractionMode } = useInteractionMode();
 
   return (
     <button onClick={toggleInteractionMode} className="toggleButton">

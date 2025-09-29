@@ -22,7 +22,7 @@ export function PlaylistStack({ playlistIds }: { playlistIds: string[] }) {
   const rowHeight = 20; // Adjust as needed
 
   return (
-    <div className={styles.playlistContainer}>
+    <div className={styles.playlistStack}>
       {playlistIds.map((p, index) => {
         const column = Math.floor(index / 10);
         const row = index % 10;

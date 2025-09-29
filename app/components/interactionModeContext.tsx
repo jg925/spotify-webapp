@@ -23,20 +23,39 @@ export function InteractionModeProvider({ children }: { children: ReactNode }) {
   const [interactionMode, setInteractionModeState] =
     useState<InteractionMode>("swipe");
 
-  const setInteractionMode = useCallback((mode: InteractionMode) => {
-    console.log("global mode changed to:", mode); //debug log
-    setInteractionModeState(mode);
-  }, []);
+  const setInteractionModeStateLogged = useCallback(
+    (value: InteractionMode | ((prev: InteractionMode) => InteractionMode)) => {
+      setInteractionModeState((prev) => {
+        const next =
+          typeof value === "function"
+            ? (value as (p: InteractionMode) => InteractionMode)(prev)
+            : value;
+        console.log("global mode changed to:", next); //debug log
+        return next;
+      });
+    },
+    []
+  );
+
+  const setInteractionMode = useCallback(
+    (mode: InteractionMode) => {
+      //console.log("global mode changed to:", mode); //debug log
+      setInteractionModeStateLogged(mode);
+    },
+    [setInteractionModeStateLogged]
+  );
 
   const toggleInteractionMode = useCallback(() => {
-    setInteractionModeState((prev) => (prev === "swipe" ? "tap" : "swipe"));
-  }, []);
+    setInteractionModeStateLogged((prev) =>
+      prev === "swipe" ? "tap" : "swipe"
+    );
+  }, [setInteractionModeStateLogged]);
 
   //reset to swipe mode
   const resetToSwipeMode = useCallback(() => {
     console.log("Resetting interaction mode to swipe");
-    setInteractionModeState("swipe");
-  }, []);
+    setInteractionModeStateLogged("swipe");
+  }, [setInteractionModeStateLogged]);
 
   return (
     <InteractionModeContext.Provider
