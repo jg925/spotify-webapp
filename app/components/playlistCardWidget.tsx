@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, PointerEvent } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSpring, animated as a } from "@react-spring/web";
 import { useInteractionMode } from "./interactionModeContext";
 import styles from "../../components/playlistCardWidget.module.css";
@@ -37,7 +37,7 @@ PlaylistCardWidgetProps) {
     isSwipingRef.current = isSwiping;
   }, [isSwiping]);
 
-  const handleTouchStart = (e: PointerEvent) => {
+  const handlePointerDownWindow = (e: globalThis.PointerEvent) => {
     if (interactionMode === "swipe") {
       console.log("touchStart");
       touchStartX.current = e.clientX;
@@ -51,7 +51,7 @@ PlaylistCardWidgetProps) {
     }
   };
 
-  const handleTouchMove = (e: PointerEvent) => {
+  const handlePointerMoveWindow = (e: globalThis.PointerEvent) => {
     if (interactionMode === "swipe") {
       const dx = e.clientX - touchStartX.current;
       const dy = e.clientY - touchStartY.current;
@@ -63,7 +63,7 @@ PlaylistCardWidgetProps) {
     }
   };
 
-  const handleTouchEnd = (e: PointerEvent) => {
+  const handlePointerUpWindow = (e: globalThis.PointerEvent) => {
     if (interactionMode === "swipe") {
       const dx = e.clientX - touchStartX.current;
       if (Math.abs(dx) > 100) {
@@ -83,15 +83,22 @@ PlaylistCardWidgetProps) {
     setHasMounted(true);
   }, []);
 
+  const handlePointerDownReact = (e: React.PointerEvent) =>
+    handlePointerDownWindow(e.nativeEvent as globalThis.PointerEvent);
+  const handlePointerMoveReact = (e: React.PointerEvent) =>
+    handlePointerMoveWindow(e.nativeEvent as globalThis.PointerEvent);
+  const handlePointerUpReact = (e: React.PointerEvent) =>
+    handlePointerUpWindow(e.nativeEvent as globalThis.PointerEvent);
+
   useEffect(() => {
-    window.addEventListener("pointermove", handleTouchMove);
-    window.addEventListener("pointerup", handleTouchEnd);
-    window.addEventListener("pointerdown", handleTouchStart);
+    window.addEventListener("pointermove", handlePointerMoveWindow);
+    window.addEventListener("pointerup", handlePointerUpWindow);
+    window.addEventListener("pointerdown", handlePointerDownWindow);
 
     return () => {
-      window.removeEventListener("pointermove", handleTouchMove);
-      window.removeEventListener("pointerup", handleTouchEnd);
-      window.removeEventListener("pointerdown", handleTouchStart);
+      window.removeEventListener("pointermove", handlePointerMoveWindow);
+      window.removeEventListener("pointerup", handlePointerUpWindow);
+      window.removeEventListener("pointerdown", handlePointerDownWindow);
     };
   }, [isSwiping]);
 
@@ -115,9 +122,9 @@ PlaylistCardWidgetProps) {
         className={`${styles.overlay} ${
           interactionMode === "swipe" ? styles.swiping : ""
         }`}
-        onPointerDown={handleTouchStart}
-        onPointerMove={handleTouchMove}
-        onPointerUp={handleTouchEnd}
+        onPointerDown={handlePointerDownReact}
+        onPointerMove={handlePointerMoveReact}
+        onPointerUp={handlePointerUpReact}
         title="Flick fast enough to swipe card away"
         style={{
           cursor:
