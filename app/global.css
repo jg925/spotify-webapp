@@ -1,8 +1,10 @@
-html {
+html,
+#__next {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+  box-sizing: border-box;
 }
 
 body {
@@ -10,7 +12,8 @@ body {
   display: flex;
   overflow: visible;
   width: auto;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
   margin-top: 0px;
   margin-left: 0px;
   flex-flow: column;
@@ -42,7 +45,11 @@ body {
 .pageContainer {
   flex-direction: column; /* Stack children vertically */
   align-items: center; /* Center-align content horizontally */
-  width: auto; /* Full width of the page */
+  width: 100vw; /* Full width of the page */
+  height: 100dvh; /*preferred*/
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
   justify-content: center;
   text-align: center;
 }
@@ -88,6 +95,12 @@ body {
 @media screen and (max-width: 767px) {
   body {
     width: auto;
+  }
+  .text h1 {
+    line-height: 1.2; /* unitless is recommended (1.0 - 1.3 typical) */
+  }
+  .text p {
+    margin: 0 10px; /* add horizontal margin for better readability */
   }
 }
 

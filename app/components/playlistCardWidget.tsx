@@ -1,29 +1,35 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { useSpring, animated as a } from "@react-spring/web";
-import { useInteractionMode } from "./interactionModeContext";
+import {
+  InteractionModeContext,
+  useInteractionMode,
+} from "./interactionModeContext";
 import styles from "../../components/playlistCardWidget.module.css";
 
-let nextZIndex = 1;
+let nextZIndex = 1000;
 
 type PlaylistCardWidgetProps = {
   playlistId: string;
   initialX: number;
   initialY: number;
+  initialZ?: number;
+  isTop?: boolean;
   //onSwipe?: () => void;
 };
-
-//Need to change all of the mouse interactions to be touch interactions. And add a button?
 
 export default function PlaylistCardWidget({
   playlistId,
   initialX,
   initialY,
+  isTop = false,
+  initialZ,
 }: //onSwipe,
 PlaylistCardWidgetProps) {
   const [hasMounted, setHasMounted] = useState(false);
   const isSwipingRef = useRef(false);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [zIndex, setZIndex] = useState<number>(initialZ ?? nextZIndex++);
   const { interactionMode } = useInteractionMode();
   const [position, setPosition] = useSpring(() => ({
     x: initialX,
@@ -38,7 +44,7 @@ PlaylistCardWidgetProps) {
   }, [isSwiping]);
 
   const handlePointerDownWindow = (e: globalThis.PointerEvent) => {
-    if (interactionMode === "swipe") {
+    if (isTop && interactionMode === "swipe") {
       console.log("touchStart");
       touchStartX.current = e.clientX;
       touchStartY.current = e.clientY;
@@ -48,11 +54,12 @@ PlaylistCardWidgetProps) {
         touchStartY.current
       );
       setIsSwiping(true);
+      setZIndex(nextZIndex++);
     }
   };
 
   const handlePointerMoveWindow = (e: globalThis.PointerEvent) => {
-    if (interactionMode === "swipe") {
+    if (isTop && interactionMode === "swipe" && isSwipingRef.current) {
       const dx = e.clientX - touchStartX.current;
       const dy = e.clientY - touchStartY.current;
       setPosition({
@@ -64,7 +71,7 @@ PlaylistCardWidgetProps) {
   };
 
   const handlePointerUpWindow = (e: globalThis.PointerEvent) => {
-    if (interactionMode === "swipe") {
+    if (isTop && interactionMode === "swipe") {
       const dx = e.clientX - touchStartX.current;
       if (Math.abs(dx) > 100) {
         //becomes a flick
@@ -91,6 +98,11 @@ PlaylistCardWidgetProps) {
     handlePointerUpWindow(e.nativeEvent as globalThis.PointerEvent);
 
   useEffect(() => {
+    if (interactionMode === "tap") {
+      setIsSwiping(false);
+      return;
+    }
+
     window.addEventListener("pointermove", handlePointerMoveWindow);
     window.addEventListener("pointerup", handlePointerUpWindow);
     window.addEventListener("pointerdown", handlePointerDownWindow);
@@ -100,7 +112,7 @@ PlaylistCardWidgetProps) {
       window.removeEventListener("pointerup", handlePointerUpWindow);
       window.removeEventListener("pointerdown", handlePointerDownWindow);
     };
-  }, [isSwiping]);
+  }, [interactionMode, isTop]);
 
   if (!hasMounted) {
     return null; // Prevent rendering on the server side
@@ -109,7 +121,12 @@ PlaylistCardWidgetProps) {
   return (
     <a.div
       className={styles.container}
-      //style={{ left: position.x, top: position.y}}
+      style={{
+        left: position.x,
+        top: position.y,
+        rotate: position.rotate,
+        zIndex,
+      }}
     >
       <iframe
         key={playlistId}
@@ -120,20 +137,18 @@ PlaylistCardWidgetProps) {
       />
       <div
         className={`${styles.overlay} ${
-          interactionMode === "swipe" ? styles.swiping : ""
+          interactionMode === "swipe" && isTop ? styles.swiping : ""
         }`}
-        onPointerDown={handlePointerDownReact}
-        onPointerMove={handlePointerMoveReact}
-        onPointerUp={handlePointerUpReact}
+        onPointerDown={isTop ? handlePointerDownReact : undefined}
         title="Flick fast enough to swipe card away"
         style={{
           cursor:
-            interactionMode === "swipe"
+            interactionMode === "swipe" && isTop
               ? isSwiping
                 ? "grabbing"
                 : "grab"
               : "default",
-          pointerEvents: isSwiping ? "auto" : "none",
+          pointerEvents: interactionMode === "swipe" && isTop ? "auto" : "none",
         }}
       />
     </a.div>

@@ -9,7 +9,7 @@ export function PlaylistDeck({ playlistIds }: { playlistIds: string[] }) {
 
   useEffect(() => {
     const updateContainerWidth = () => {
-      const container = document.querySelector(".playlistContainer");
+      const container = document.querySelector(".deckContainer");
       if (container) {
         setContainerWidth(container.clientWidth);
       }
@@ -19,20 +19,29 @@ export function PlaylistDeck({ playlistIds }: { playlistIds: string[] }) {
     return () => window.removeEventListener("resize", updateContainerWidth);
   }, []);
 
-  const columnWidth = containerWidth / 3;
+  const cardWidth = 400;
+  const columnCenter = containerWidth ? (containerWidth - cardWidth) / 2 : 0;
   const rowHeight = 20; // Adjust as needed
+
+  const visible = playlistIds.slice(0, 2);
 
   return (
     <div className={styles.deckContainer}>
-      {playlistIds.slice(0, 2).map((p, index) => {
-        const row = index % 10;
-        const column = index % 10;
+      {visible.map((p, index) => {
+        const stackIndex = visible.length - index - 1;
+        const baseZ = 1000;
+        const initialX = columnCenter; // center horizontally
+        const initialY = stackIndex * rowHeight; //slight vertical stagger
+        const initialZ = baseZ + (visible.length - index); // top card is on top
+        const isTop = index === 0;
         return (
           <PlaylistCardWidget
             key={p}
             playlistId={p}
-            initialX={column} //all in one column
-            initialY={row * rowHeight} //stagger vertically
+            initialX={initialX} //all in one column
+            initialY={initialY} //stagger vertically
+            isTop={isTop}
+            initialZ={initialZ}
           />
         );
       })}
