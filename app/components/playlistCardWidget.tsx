@@ -9,11 +9,7 @@ import styles from "../../components/playlistCardWidget.module.css";
 
 let nextZIndex = 100000; //make sure it starts high.
 
-const bringToTop = (innitial?: number) => {
-  const candidate = Math.max(nextZIndex, innitial ?? 0) + 1;
-  nextZIndex = candidate + 1;
-  return candidate;
-};
+const bringToTop = () => ++nextZIndex;
 
 type PlaylistCardWidgetProps = {
   playlistId: string;
@@ -35,7 +31,7 @@ export default function PlaylistCardWidget({
   const [hasMounted, setHasMounted] = useState(false);
   const isSwipingRef = useRef(false);
   const [isSwiping, setIsSwiping] = useState(false);
-  const [zIndex, setZIndex] = useState<number>(initialZ ?? nextZIndex++);
+  const [zIndex, setZIndex] = useState<number>(() => initialZ ?? 1000);
   const { interactionMode } = useInteractionMode();
   const [position, api] = useSpring(() => ({
     x: initialX,
@@ -53,13 +49,32 @@ export default function PlaylistCardWidget({
   const velocityRef = useRef(0); // px/sec
 
   useEffect(() => {
+    if (!isSwiping) {
+      //small delay to allow prefetch to load
+      const timer = setTimeout(() => {
+        api.start({
+          y: initialY,
+          config: { tension: 300, friction: 30 },
+        });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isTop, initialY, api, isSwiping]);
+
+  useEffect(() => {
+    console.log(
+      `Widget mounted: playlistId=${playlistId}, initialZ=${initialZ}, isTop=${isTop}`
+    );
+  }, [playlistId, initialZ, isTop]);
+
+  useEffect(() => {
     isSwipingRef.current = isSwiping;
   }, [isSwiping]);
 
   const handlePointerDownWindow = (e: globalThis.PointerEvent) => {
+    if (!isTop || interactionMode !== "swipe") return;
     //add to check if the touch starts on the top card.
     if (isTop && interactionMode === "swipe") {
-      console.log("touchStart");
       const rect = containerRef.current?.getBoundingClientRect();
       if (!rect) return;
       const inside =
@@ -72,16 +87,11 @@ export default function PlaylistCardWidget({
         return;
       }
       pointerStartedOnTopRef.current = true;
-      console.log("touchStart inside top card");
       touchStartX.current = e.clientX;
       touchStartY.current = e.clientY;
-      console.log(
-        "touchStart coords:",
-        touchStartX.current,
-        touchStartY.current
-      );
       setIsSwiping(true);
-      setZIndex(bringToTop(initialZ));
+      //setZIndex(;
+      setZIndex(bringToTop());
       //initialize velocity tracking
       lastMoveX.current = e.clientX;
       lastMoveTime.current = e.timeStamp ?? Date.now();
@@ -105,7 +115,6 @@ export default function PlaylistCardWidget({
         if (dt > 0) {
           const vx = (e.clientX - lastMoveX.current) / (dt / 1000); // px/sec
           velocityRef.current = vx;
-          console.log("vx:", vx);
         }
       }
       lastMoveX.current = e.clientX;
@@ -129,7 +138,7 @@ export default function PlaylistCardWidget({
       const speed = Math.abs(vx);
       const VELOC_THRESH = 1000;
       const isFlick = speed > VELOC_THRESH;
-      console.log("is flick: ", isFlick);
+      console.log("is flick: ", isFlick, " card=", playlistId);
       if (isFlick) {
         //becomes a flick
         const targetX =

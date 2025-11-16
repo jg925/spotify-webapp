@@ -1,5 +1,6 @@
 .container {
   position: absolute;
+  display: flex;
   left: 0;
   top: 0;
   width: 100vw;
@@ -19,14 +20,14 @@
   width: 90%;
   height: 100%;
   cursor: grab;
-  z-index: 11;
+  /*z-index: 11;*/
   pointer-events: auto;
   touch-action: none;
 }
 
 .overlay.swiping {
   cursor: grabbing;
-  z-index: 100; /* Bring to front when dragging */
+  /*z-index: 100; /* Bring to front when dragging */
 }
 
 .iframe {
