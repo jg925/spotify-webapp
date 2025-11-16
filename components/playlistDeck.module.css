@@ -1,0 +1,52 @@
+.deckContainer {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 420px;
+  margin: 0 auto;
+  overflow: visible;
+  touch-action: none; /* Prevent browser scroll */
+}
+
+.backCard {
+  position: absolute;
+  inset: 0;
+  transform: scale(0.95);
+  opacity: 0.7; /* higher = better visibility */
+  pointer-events: none;
+  touch-action: none; /* bg card doesn't interfere with gesture */
+}
+
+.backCard iframe {
+  width: 90%;
+  height: 380px;
+  border: none;
+  border-radius: 12px;
+}
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.resetButton {
+  background: #1db954;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+/* adjust for mobile if needed */
+@media (max-width: 480px) {
+  .resetButton {
+    padding: 12px 18px;
+    font-size: 16px;
+  }
+}
