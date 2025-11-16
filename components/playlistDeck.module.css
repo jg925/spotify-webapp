@@ -23,3 +23,30 @@
   border: none;
   border-radius: 12px;
 }
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.resetButton {
+  background: #1db954;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+/* adjust for mobile if needed */
+@media (max-width: 480px) {
+  .resetButton {
+    padding: 12px 18px;
+    font-size: 16px;
+  }
+}

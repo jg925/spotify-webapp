@@ -7,7 +7,13 @@ import {
 } from "./interactionModeContext";
 import styles from "../../components/playlistCardWidget.module.css";
 
-let nextZIndex = 1000;
+let nextZIndex = 100000; //make sure it starts high.
+
+const bringToTop = (innitial?: number) => {
+  const candidate = Math.max(nextZIndex, innitial ?? 0) + 1;
+  nextZIndex = candidate + 1;
+  return candidate;
+};
 
 type PlaylistCardWidgetProps = {
   playlistId: string;
@@ -39,6 +45,8 @@ export default function PlaylistCardWidget({
   }));
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
+  const pointerStartedOnTopRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   // velocity
   const lastMoveX = useRef<number | null>(null);
   const lastMoveTime = useRef<number | null>(null);
@@ -49,8 +57,22 @@ export default function PlaylistCardWidget({
   }, [isSwiping]);
 
   const handlePointerDownWindow = (e: globalThis.PointerEvent) => {
+    //add to check if the touch starts on the top card.
     if (isTop && interactionMode === "swipe") {
       console.log("touchStart");
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (!inside) {
+        pointerStartedOnTopRef.current = false;
+        return;
+      }
+      pointerStartedOnTopRef.current = true;
+      console.log("touchStart inside top card");
       touchStartX.current = e.clientX;
       touchStartY.current = e.clientY;
       console.log(
@@ -59,7 +81,7 @@ export default function PlaylistCardWidget({
         touchStartY.current
       );
       setIsSwiping(true);
-      setZIndex(nextZIndex++);
+      setZIndex(bringToTop(initialZ));
       //initialize velocity tracking
       lastMoveX.current = e.clientX;
       lastMoveTime.current = e.timeStamp ?? Date.now();
@@ -68,7 +90,12 @@ export default function PlaylistCardWidget({
   };
 
   const handlePointerMoveWindow = (e: globalThis.PointerEvent) => {
-    if (isTop && interactionMode === "swipe" && isSwipingRef.current) {
+    if (
+      isTop &&
+      interactionMode === "swipe" &&
+      isSwipingRef.current &&
+      pointerStartedOnTopRef.current
+    ) {
       const dx = e.clientX - touchStartX.current;
       const dy = e.clientY - touchStartY.current;
       //compute instantaneous velocity
@@ -93,13 +120,16 @@ export default function PlaylistCardWidget({
   };
 
   const handlePointerUpWindow = (e: globalThis.PointerEvent) => {
+    if (!(isTop && interactionMode === "swipe")) return;
+    //only process if pointerdown started on top card
     if (isTop && interactionMode === "swipe") {
+      if (!pointerStartedOnTopRef.current) return;
       const dx = e.clientX - touchStartX.current;
       const vx = velocityRef.current;
       const speed = Math.abs(vx);
-      const VELOC_THRESH = 800;
-      const DIST_THRESH = 100;
-      const isFlick = speed > VELOC_THRESH || Math.abs(dx) > DIST_THRESH;
+      const VELOC_THRESH = 1000;
+      const isFlick = speed > VELOC_THRESH;
+      console.log("is flick: ", isFlick);
       if (isFlick) {
         //becomes a flick
         const targetX =
@@ -110,19 +140,23 @@ export default function PlaylistCardWidget({
           config: { tension: 200, friction: 20 },
           onRest: () => {
             setIsSwiping(false);
+            pointerStartedOnTopRef.current = false;
             onSwipe?.(dx > 0 ? "right" : "left");
           },
         });
       } else {
         //snap back to original position
         api.start({ x: initialX, y: initialY, rotate: 0 });
+        pointerStartedOnTopRef.current = false;
+        setIsSwiping(false);
       }
       //reset velocity tracking
       lastMoveX.current = null;
       lastMoveTime.current = null;
       velocityRef.current = 0;
-      setIsSwiping(false);
-      console.log("touchEnd");
+      //pointerStartedOnTopRef.current = false;
+      //setIsSwiping(false);
+      //console.log("touchEnd");
     }
   };
 
@@ -161,6 +195,7 @@ export default function PlaylistCardWidget({
   return (
     <a.div
       className={styles.container}
+      ref={containerRef}
       style={{
         x: position.x,
         y: position.y,
@@ -174,6 +209,7 @@ export default function PlaylistCardWidget({
         src={`https://open.spotify.com/embed/playlist/${playlistId}`}
         className={styles.iframe}
         allow="encrypted-media;"
+        style={{ pointerEvents: isTop ? "auto" : "none" }}
         loading="lazy"
       />
       <div

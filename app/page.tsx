@@ -23,6 +23,8 @@ function PageContent() {
         const playlistIds = await retrievePlaylists();
         if (playlistIds.length > 0) {
           setPlaylistIds(playlistIds);
+          // reset page number to first when new list loads
+          setCurrentIndex(0);
         } else {
           console.warn("No playlists found or failed to fetch.");
         }
@@ -91,7 +93,10 @@ function PageContent() {
               <p className="text">
                 {currentIndex + 1}/{playlistIds.length}
               </p>
-              <PlaylistDeck playlistIds={playlistIds} />
+              <PlaylistDeck
+                playlistIds={playlistIds}
+                onCurrentChange={handleCurrentChange}
+              />
               <ToggleButton />
             </>
           )}
