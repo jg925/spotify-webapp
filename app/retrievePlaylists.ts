@@ -5,9 +5,6 @@ import { doc, getDocFromServer, setLogLevel } from "firebase/firestore";
 
 export async function retrievePlaylists() {
   const cacheKey = "playlistIdsCache";
-  const cacheExpiryKey = "playlistIdsCacheExpiry";
-  const cacheExpiryTime = 3600 * 1000;
-  //localStorage.removeItem("playlistIdsCache"); // Clear cache on each call for fresh data
   try {
     // Check for playlist cache
     const cachedPlaylists = localStorage.getItem(cacheKey);

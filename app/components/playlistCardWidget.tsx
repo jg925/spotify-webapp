@@ -1,10 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useContext } from "react";
 import { useSpring, animated as a } from "@react-spring/web";
-import {
-  InteractionModeContext,
-  useInteractionMode,
-} from "./interactionModeContext";
+import { useInteractionMode } from "./interactionModeContext";
 import styles from "../../components/playlistCardWidget.module.css";
 
 let nextZIndex = 100000; //make sure it starts high.
@@ -90,7 +87,6 @@ export default function PlaylistCardWidget({
       touchStartX.current = e.clientX;
       touchStartY.current = e.clientY;
       setIsSwiping(true);
-      //setZIndex(;
       setZIndex(bringToTop());
       //initialize velocity tracking
       lastMoveX.current = e.clientX;
@@ -163,9 +159,6 @@ export default function PlaylistCardWidget({
       lastMoveX.current = null;
       lastMoveTime.current = null;
       velocityRef.current = 0;
-      //pointerStartedOnTopRef.current = false;
-      //setIsSwiping(false);
-      //console.log("touchEnd");
     }
   };
 
@@ -175,10 +168,10 @@ export default function PlaylistCardWidget({
 
   const handlePointerDownReact = (e: React.PointerEvent) =>
     handlePointerDownWindow(e.nativeEvent as globalThis.PointerEvent);
-  const handlePointerMoveReact = (e: React.PointerEvent) =>
+  /*const handlePointerMoveReact = (e: React.PointerEvent) =>
     handlePointerMoveWindow(e.nativeEvent as globalThis.PointerEvent);
   const handlePointerUpReact = (e: React.PointerEvent) =>
-    handlePointerUpWindow(e.nativeEvent as globalThis.PointerEvent);
+    handlePointerUpWindow(e.nativeEvent as globalThis.PointerEvent);*/
 
   useEffect(() => {
     if (interactionMode === "tap") {

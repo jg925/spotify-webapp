@@ -115,7 +115,6 @@ export function PlaylistDeck({
           const isTop = actualIndex === 0;
           const initialZ = BASE_Z + (VISIBLE_COUNT - actualIndex);
           const stackIndex = visible.length - actualIndex - 1;
-          //const baseZ = 1000;
           const initialX = columnCenter;
           const initialY = stackIndex * rowHeight;
 

@@ -2,19 +2,14 @@
 import { PlaylistStack } from "./components/playlistStack";
 import { PlaylistDeck } from "./components/playlistDeck";
 import ToggleButton from "./components/toggleButton";
-import {
-  InteractionModeProvider,
-  useInteractionMode,
-} from "./components/interactionModeContext";
-import { useState, useEffect, memo, useCallback, useMemo } from "react";
+import { InteractionModeProvider } from "./components/interactionModeContext";
+import { useState, useEffect, useCallback } from "react";
 import { retrievePlaylists } from "./retrievePlaylists";
 import { isMobile } from "../hooks/isMobile";
 
 function PageContent() {
   const [playlistIds, setPlaylistIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  const { interactionMode, setInteractionMode } = useInteractionMode();
 
   useEffect(() => {
     async function fetchPlaylists() {
@@ -44,18 +39,6 @@ function PageContent() {
   const handleCurrentChange = useCallback((index: number) => {
     setCurrentIndex(index);
   }, []);
-
-  //memoize the deck component
-  /*const playlistDeck = useMemo(() => {
-    if (playlistIds.length === 0) return null;
-
-    return (
-      <PlaylistDeck
-        playlists={playlistIds}
-        onCurrentChange={handleCurrentChange}
-      />
-    );
-  }, [playlistIds, handleCurrentChange]);*/
 
   return (
     <div style={{ minHeight: "100vh", width: "100%" }}>
