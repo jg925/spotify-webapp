@@ -76,11 +76,11 @@ function PageContent() {
               <p className="text">
                 {currentIndex + 1}/{playlistIds.length}
               </p>
+              <ToggleButton />
               <PlaylistDeck
                 playlistIds={playlistIds}
                 onCurrentChange={handleCurrentChange}
               />
-              <ToggleButton />
             </>
           )}
         </div>
